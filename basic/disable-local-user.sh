@@ -1,12 +1,12 @@
 #!/bin/bash
 #
-# disables local user
+# This script disables, deletes, and/or archives users on the local system.
 
 MODE='disable'
 REMOVE_HOME_DIRECTORY=''
 ARCHIVE_HOME_DIRECTORY='false'
 
-
+# Display the usage and exit.
 usage() {
 	echo "Usage: ${0} [-d] [-r] [-a] USER [USERN]..." >&2
 	echo "Disables (expires/locks) accounts by default" >&2
@@ -17,6 +17,7 @@ usage() {
 	exit 1
 }
 
+# Make sure the UID of the account is at least 1000.
 validateDeleteOperation() {
 	local USERNAME=${1}
 	local ACCOUNT_ID=$(id -u ${USERNAME})
@@ -28,6 +29,7 @@ validateDeleteOperation() {
 	fi
 }
 
+# Create an archive if requested to do so.
 archiveHomeDirectory() {
 	local USERNAME="${1}"
 
@@ -59,13 +61,14 @@ processUserOperation() {
   fi
 }
 
-
+# Make sure the script is being executed with superuser privileges.
 if [[ "${UID}" -ne "0" ]]
 then
 	echo 'you should run this as root' >&2
 	exit 1
 fi
 
+# Parse the options.
 while getopts dra OPTION
 do
 	case ${OPTION} in
@@ -76,14 +79,18 @@ do
 	esac
 done
 
+# Remove the options while leaving the remaining arguments.
 shift "$(( OPTIND - 1 ))"
+# If the user doesn't supply at least one argument, give them help.
 if [[ "${#}" -eq "0" ]]
 then
 	usage
 fi
 
+# Loop through all the usernames supplied as arguments.
 while [[ "${#}" -gt "0" ]]
 do
+  echo "Processing user: ${USERNAME}"
 	processUserOperation "${1}"
 	shift
 done
