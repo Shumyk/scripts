@@ -2,8 +2,6 @@ module shumyk/select_image_prompt
 
 go 1.19
 
-require rsc.io/quote v1.5.2
-
 require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/mattn/go-colorable v0.1.2 // indirect
@@ -16,5 +14,4 @@ require (
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.6
 	golang.org/x/text v0.3.3 // indirect
-	rsc.io/sampler v1.3.0 // indirect
 )
