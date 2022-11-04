@@ -7,32 +7,33 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 )
 
-const DIVIDER = "     "
-const SPACE = " "
-const SEPARATOR = "|"
+const (
+	DIVIDER   = "     "
+	SPACE     = " "
+	SEPARATOR = "|"
+)
 
 func main() {
-	selectedImageTmpFilename := os.Args[1]
-	imagesInfoArgs := os.Args[2:]
-	imagesInfoFormatted := formatImagesInfo(imagesInfoArgs)
+	outputFile := os.Args[1]
+	rawImagesInfo := os.Args[2:]
 
 	prompt := &survey.Select{
 		Message: "select image to deploy",
-		Options: imagesInfoFormatted,
+		Options: formatImagesInfo(rawImagesInfo),
 	}
 	selectedImage := ""
 	survey.AskOne(prompt, &selectedImage)
-	selectedImage = strings.Replace(selectedImage, DIVIDER, SPACE, -1)
 
-	os.WriteFile(selectedImageTmpFilename, []byte(selectedImage), 0666)
+	selectedImage = strings.Replace(selectedImage, DIVIDER, SPACE, -1)
+	os.WriteFile(outputFile, []byte(selectedImage), 0666)
 }
 
 func formatImagesInfo(imagesInfo []string) []string {
 	var imagesInfoFormatted []string
-	for i := 0; i < len(imagesInfo); i++ {
+	for _, info := range imagesInfo {
 		imagesInfoFormatted = append(
 			imagesInfoFormatted,
-			strings.Replace(imagesInfo[i], SEPARATOR, DIVIDER, -1),
+			strings.Replace(info, SEPARATOR, DIVIDER, -1),
 		)
 	}
 	return imagesInfoFormatted
