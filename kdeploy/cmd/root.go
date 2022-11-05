@@ -14,17 +14,23 @@ var (
 	kdeploy = cobra.Command{
 		Use:   "kdeploy microservice [image list size]",
 		Short: "k[8s]deploy - deploy from the terminal",
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
-				fmt.Fprintln(os.Stderr, "usage")
-				os.Exit(1)
-			}
-			microservice = args[0]
-
-			fmt.Fprintln(os.Stdout, "kdeploy", microservice, imageListSize)
-		},
+		Run:   run,
 	}
 )
+
+func run(cmd *cobra.Command, args []string) {
+	validateArgs(args)
+	microservice = args[0]
+
+	fmt.Fprintln(os.Stdout, "kdeploy", microservice, imageListSize)
+}
+
+func validateArgs(args []string) {
+	if len(args) < 1 {
+		fmt.Fprintln(os.Stderr, "usage")
+		os.Exit(1)
+	}
+}
 
 func Execute() {
 	if err := kdeploy.Execute(); err != nil {
