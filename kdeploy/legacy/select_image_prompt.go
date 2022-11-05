@@ -1,4 +1,6 @@
-package main
+//go:build exclude
+
+package legacy
 
 import (
 	"os"
@@ -13,7 +15,7 @@ const (
 	SEPARATOR = "|"
 )
 
-func main() {
+func select_image_prompt() {
 	outputFile := os.Args[1]
 	rawImagesInfo := os.Args[2:]
 
