@@ -3,14 +3,13 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strconv"
 
 	"github.com/spf13/cobra"
 )
 
 var (
 	microservice  string
-	imageListSize int = 20
+	imageListSize int
 
 	kdeploy = cobra.Command{
 		Use:   "kdeploy microservice [image list size]",
@@ -21,9 +20,6 @@ var (
 				os.Exit(1)
 			}
 			microservice = args[0]
-			if len(args) == 2 {
-				imageListSize, _ = strconv.Atoi(args[1])
-			}
 
 			fmt.Fprintln(os.Stdout, "kdeploy", microservice, imageListSize)
 		},
@@ -35,4 +31,8 @@ func Execute() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+}
+
+func init() {
+	kdeploy.PersistentFlags().IntVarP(&imageListSize, "list", "l", 20, "amount of images to fetch")
 }
