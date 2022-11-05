@@ -12,7 +12,7 @@ var (
 	imageListSize int
 
 	kdeploy = cobra.Command{
-		Use:   "kdeploy microservice [image list size]",
+		Use:   "kdeploy microservice",
 		Short: "k[8s]deploy - deploy from the terminal",
 		Run:   run,
 	}
