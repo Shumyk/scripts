@@ -21,6 +21,8 @@ var (
 	namespace    string
 	workloadName string
 	currentImage string
+
+	statefulSets = map[string]any{"api-core": struct{}{}}
 )
 
 func init() {
@@ -55,8 +57,13 @@ func Namespace() {
 
 func resolveImage(namespace string) string {
 	clientSet, _ := kubernetes.NewForConfig(k8sRestConfig)
-	// TODO: handle statefulset
-	workload, _ := clientSet.AppsV1().Deployments(namespace).Get(context.Background(), workloadName, v1.GetOptions{})
-	currentImage = workload.Spec.Template.Spec.Containers[0].Image
-	return currentImage
+	if _, ok := statefulSets[microservice]; ok {
+		workload, _ := clientSet.AppsV1().StatefulSets(namespace).Get(context.Background(), workloadName, v1.GetOptions{})
+		currentImage = workload.Spec.Template.Spec.Containers[0].Image
+		return currentImage
+	} else {
+		workload, _ := clientSet.AppsV1().Deployments(namespace).Get(context.Background(), workloadName, v1.GetOptions{})
+		currentImage = workload.Spec.Template.Spec.Containers[0].Image
+		return currentImage
+	}
 }
