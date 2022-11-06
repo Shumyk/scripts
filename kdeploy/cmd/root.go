@@ -23,6 +23,7 @@ func run(cmd *cobra.Command, args []string) {
 	microservice = args[0]
 
 	fmt.Fprintln(os.Stdout, "kdeploy", microservice, imageListSize)
+	ResolveResources()
 }
 
 func validateArgs(args []string) {

@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	kdeploy.AddCommand(previousCmd)
+	// kdeploy.AddCommand(previousCmd)
 }
 
 var previousCmd = &cobra.Command{
