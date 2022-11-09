@@ -11,6 +11,10 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"github.com/google/go-containerregistry/pkg/authn"
+	gcr "github.com/google/go-containerregistry/pkg/name"
+	"github.com/google/go-containerregistry/pkg/v1/google"
+
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
@@ -38,10 +42,12 @@ func ResolveResources() {
 	workloadName = namespace + "-" + microservice
 	workloadResource := resolveWorkloadResource()
 	resolveImage(namespace)
+	getImages()
 
 	fmt.Fprintln(os.Stdout, "Namespace:", namespace)
 	fmt.Fprintln(os.Stdout, "Workload resource:", workloadResource)
 	fmt.Fprintln(os.Stdout, "Current Image:", currentImage)
+	// fmt.Fprintln(os.Stdout, "tags: ", tags)
 }
 
 func resolveWorkloadResource() string {
@@ -66,4 +72,23 @@ func resolveImage(namespace string) string {
 		currentImage = workload.Spec.Template.Spec.Containers[0].Image
 		return currentImage
 	}
+}
+
+func getImages() {
+	fmt.Println()
+
+	google.NewGcloudAuthenticator()
+	repo, _ := gcr.NewRepository("your-repo-"+microservice, gcr.WithDefaultRegistry("us.gcr.io"))
+	tags, _ := google.List(repo, google.WithAuthFromKeychain(authn.DefaultKeychain))
+
+	options := make([]ImageOption, 0)
+	for k, v := range tags.Manifests {
+		if len(k) > 0 {
+			options = append(options, ImageOption{v.Created, v.Tags, k})
+		}
+	}
+	selectedImage := PromptImageSelect(options)
+	fmt.Fprintln(os.Stdout, "selectedImage:", selectedImage)
+
+	fmt.Println()
 }
