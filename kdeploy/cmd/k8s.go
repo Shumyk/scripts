@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -87,6 +88,11 @@ func getImages() {
 			options = append(options, ImageOption{v.Created, v.Tags, k})
 		}
 	}
+
+	sort.SliceStable(options, func(i, j int) bool {
+		return options[i].Created.After(options[j].Created)
+	})
+
 	selectedImage := PromptImageSelect(options)
 	fmt.Fprintln(os.Stdout, "selectedImage:", selectedImage)
 
