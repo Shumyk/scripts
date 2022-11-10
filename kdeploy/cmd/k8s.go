@@ -113,13 +113,20 @@ func setImage(image SelectedImage) {
 	deployments := clientSet.AppsV1().Deployments(namespace)
 	deployment, _ := deployments.Get(context.Background(), workloadName, v1.GetOptions{})
 	newImage := fmt.Sprintf(
-		"us.gcr.io/%v%v:%v@sha256:%v",
+		"us.gcr.io/%v%v%v@sha256:%v",
 		REPOSITORY,
 		microservice,
-		image.Tags[0], // TODO: optional semicolon
+		optionallyAppendSemicolon(image.Tags[0]),
 		image.Digest,
 	)
-	fmt.Fprintln(os.Stdout, "newImagee:", newImage)
+	fmt.Fprintln(os.Stdout, "newImage:", newImage)
 	deployment.Spec.Template.Spec.Containers[0].Image = newImage
 	deployments.Update(context.Background(), deployment, v1.UpdateOptions{})
+}
+
+func optionallyAppendSemicolon(tag string) string {
+	if len(tag) > 0 {
+		return fmt.Sprintf(":%v", tag)
+	}
+	return ""
 }
