@@ -89,12 +89,16 @@ func getImages() {
 		}
 	}
 
-	sort.SliceStable(options, func(i, j int) bool {
-		return options[i].Created.After(options[j].Created)
-	})
+	sort.SliceStable(options, sortByCreated(options))
 
 	selectedImage := PromptImageSelect(options)
 	fmt.Fprintln(os.Stdout, "selectedImage:", selectedImage)
 
 	fmt.Println()
+}
+
+func sortByCreated(options []ImageOption) func(i, j int) bool {
+	return func(i, j int) bool {
+		return options[i].Created.After(options[j].Created)
+	}
 }
