@@ -43,12 +43,14 @@ func ResolveResources() {
 	workloadName = namespace + "-" + microservice
 	workloadResource := resolveWorkloadResource()
 	resolveImage(namespace)
-	getImages()
+	tags := getImages()
+	imageOptions := sorted(toImageOptions(tags))
+	selectedImage := PromptImageSelect(imageOptions)
 
 	fmt.Fprintln(os.Stdout, "Namespace:", namespace)
 	fmt.Fprintln(os.Stdout, "Workload resource:", workloadResource)
 	fmt.Fprintln(os.Stdout, "Current Image:", currentImage)
-	// fmt.Fprintln(os.Stdout, "tags: ", tags)
+	fmt.Fprintln(os.Stdout, "selectedImage:", selectedImage)
 }
 
 func resolveWorkloadResource() string {
@@ -75,26 +77,23 @@ func resolveImage(namespace string) string {
 	}
 }
 
-func getImages() {
-	fmt.Println()
-
+func getImages() (tags *google.Tags) {
 	google.NewGcloudAuthenticator()
 	repo, _ := gcr.NewRepository("your-repo-"+microservice, gcr.WithDefaultRegistry("us.gcr.io"))
-	tags, _ := google.List(repo, google.WithAuthFromKeychain(authn.DefaultKeychain))
+	tags, _ = google.List(repo, google.WithAuthFromKeychain(authn.DefaultKeychain))
+	return
+}
 
-	options := make([]ImageOption, 0)
-	for k, v := range tags.Manifests {
-		if len(k) > 0 {
-			options = append(options, ImageOption{v.Created, v.Tags, k})
-		}
+func toImageOptions(tags *google.Tags) (options []ImageOption) {
+	for digest, manifest := range tags.Manifests {
+		options = append(options, ImageOption{manifest.Created, manifest.Tags, digest})
 	}
+	return
+}
 
+func sorted(options []ImageOption) []ImageOption {
 	sort.SliceStable(options, sortByCreated(options))
-
-	selectedImage := PromptImageSelect(options)
-	fmt.Fprintln(os.Stdout, "selectedImage:", selectedImage)
-
-	fmt.Println()
+	return options
 }
 
 func sortByCreated(options []ImageOption) func(i, j int) bool {
