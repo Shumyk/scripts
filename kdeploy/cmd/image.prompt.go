@@ -31,7 +31,7 @@ type SelectedImage struct {
 	Digest string
 }
 
-func (i *SelectedImage) WriteAnswer(field string, answer interface{}) error {
+func (i *SelectedImage) WriteAnswer(field string, answer any) error {
 	selectedValue := answer.(core.OptionAnswer).Value
 	selectedImageData := strings.Split(selectedValue, DIVIDER)
 
@@ -41,14 +41,13 @@ func (i *SelectedImage) WriteAnswer(field string, answer interface{}) error {
 	return nil
 }
 
-func PromptImageSelect(options []ImageOption) *SelectedImage {
+func PromptImageSelect(options []ImageOption) (s SelectedImage) {
 	prompt := &survey.Select{
 		Message: "select image to deploy",
 		Options: stringify(options),
 	}
-	var selectedImage SelectedImage
-	survey.AskOne(prompt, &selectedImage)
-	return &selectedImage
+	survey.AskOne(prompt, &s)
+	return
 }
 
 func stringify(options []ImageOption) []string {
