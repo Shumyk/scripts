@@ -19,9 +19,12 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
+const REPOSITORY = ""
+
 var (
 	k8sClientConfig clientcmd.ClientConfig
 	k8sRestConfig   *rest.Config
+	clientSet       *kubernetes.Clientset
 
 	namespace    string
 	workloadName string
@@ -40,17 +43,21 @@ func init() {
 
 func ResolveResources() {
 	Namespace()
+	fmt.Fprintln(os.Stdout, "Namespace:", namespace)
+
 	workloadName = namespace + "-" + microservice
 	workloadResource := resolveWorkloadResource()
-	resolveImage(namespace)
+	fmt.Fprintln(os.Stdout, "Workload resource:", workloadResource)
+
+	resolveImage()
+	fmt.Fprintln(os.Stdout, "Current Image:", currentImage)
+
 	tags := getImages()
 	imageOptions := sorted(toImageOptions(tags))
 	selectedImage := PromptImageSelect(imageOptions)
-
-	fmt.Fprintln(os.Stdout, "Namespace:", namespace)
-	fmt.Fprintln(os.Stdout, "Workload resource:", workloadResource)
-	fmt.Fprintln(os.Stdout, "Current Image:", currentImage)
 	fmt.Fprintln(os.Stdout, "selectedImage:", selectedImage)
+
+	setImage(selectedImage)
 }
 
 func resolveWorkloadResource() string {
@@ -64,8 +71,8 @@ func Namespace() {
 	namespace, _, _ = k8sClientConfig.Namespace()
 }
 
-func resolveImage(namespace string) string {
-	clientSet, _ := kubernetes.NewForConfig(k8sRestConfig)
+func resolveImage() string {
+	clientSet, _ = kubernetes.NewForConfig(k8sRestConfig)
 	if _, ok := statefulSets[microservice]; ok {
 		workload, _ := clientSet.AppsV1().StatefulSets(namespace).Get(context.Background(), workloadName, v1.GetOptions{})
 		currentImage = workload.Spec.Template.Spec.Containers[0].Image
@@ -79,7 +86,7 @@ func resolveImage(namespace string) string {
 
 func getImages() (tags *google.Tags) {
 	google.NewGcloudAuthenticator()
-	repo, _ := gcr.NewRepository("your-repo-"+microservice, gcr.WithDefaultRegistry("us.gcr.io"))
+	repo, _ := gcr.NewRepository(REPOSITORY+microservice, gcr.WithDefaultRegistry("us.gcr.io"))
 	tags, _ = google.List(repo, google.WithAuthFromKeychain(authn.DefaultKeychain))
 	return
 }
@@ -100,4 +107,19 @@ func sortByCreated(options []ImageOption) func(i, j int) bool {
 	return func(i, j int) bool {
 		return options[i].Created.After(options[j].Created)
 	}
+}
+
+func setImage(image SelectedImage) {
+	deployments := clientSet.AppsV1().Deployments(namespace)
+	deployment, _ := deployments.Get(context.Background(), workloadName, v1.GetOptions{})
+	newImage := fmt.Sprintf(
+		"us.gcr.io/%v%v:%v@sha256:%v",
+		REPOSITORY,
+		microservice,
+		image.Tags[0], // TODO: optional semicolon
+		image.Digest,
+	)
+	fmt.Fprintln(os.Stdout, "newImagee:", newImage)
+	deployment.Spec.Template.Spec.Containers[0].Image = newImage
+	deployments.Update(context.Background(), deployment, v1.UpdateOptions{})
 }
