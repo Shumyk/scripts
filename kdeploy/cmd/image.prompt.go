@@ -31,6 +31,10 @@ type SelectedImage struct {
 	Digest string
 }
 
+func (i *SelectedImage) IsEmpty() bool {
+	return len(i.Digest) == 0
+}
+
 func (i *SelectedImage) WriteAnswer(field string, answer any) error {
 	selectedValue := answer.(core.OptionAnswer).Value
 	selectedImageData := strings.Split(selectedValue, DIVIDER)

@@ -9,7 +9,6 @@ import (
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/google/go-containerregistry/pkg/authn"
@@ -23,12 +22,10 @@ const REPOSITORY = ""
 
 var (
 	k8sClientConfig clientcmd.ClientConfig
-	k8sRestConfig   *rest.Config
 	clientSet       *kubernetes.Clientset
 
 	namespace    string
 	workloadName string
-	currentImage string
 
 	statefulSets = map[string]any{"api-core": struct{}{}}
 )
@@ -38,23 +35,30 @@ func init() {
 
 	k8sConfigBypes, _ := os.ReadFile(k8sConfigPath)
 	k8sClientConfig, _ = clientcmd.NewClientConfigFromBytes(k8sConfigBypes)
-	k8sRestConfig, _ = clientcmd.BuildConfigFromFlags("", k8sConfigPath)
+	go Namespace()
+	k8sRestConfig, _ := clientcmd.BuildConfigFromFlags("", k8sConfigPath)
+	clientSet, _ = kubernetes.NewForConfig(k8sRestConfig)
 }
 
 func ResolveResources() {
-	Namespace()
-	fmt.Fprintln(os.Stdout, "Namespace:", namespace)
+	imagesChannel := make(chan *google.Tags)
+	go getImages(imagesChannel)
+
+	currentImageChannel := make(chan string)
+	go resolveCurrentImage(currentImageChannel)
 
 	workloadName = namespace + "-" + microservice
 	workloadResource := resolveWorkloadResource()
 	fmt.Fprintln(os.Stdout, "Workload resource:", workloadResource)
 
-	resolveImage()
-	fmt.Fprintln(os.Stdout, "Current Image:", currentImage)
+	fmt.Fprintln(os.Stdout, "Current Image:", <-currentImageChannel)
 
-	tags := getImages()
-	imageOptions := sorted(toImageOptions(tags))
+	imageOptions := sorted(toImageOptions(<-imagesChannel))
 	selectedImage := PromptImageSelect(imageOptions)
+	if selectedImage.IsEmpty() {
+		fmt.Fprintln(os.Stdout, "heh, ctrl+C combination was gently pressed. see you")
+		os.Exit(0)
+	}
 	fmt.Fprintln(os.Stdout, "selectedImage:", selectedImage)
 
 	setImage(selectedImage)
@@ -69,26 +73,24 @@ func resolveWorkloadResource() string {
 
 func Namespace() {
 	namespace, _, _ = k8sClientConfig.Namespace()
+	fmt.Fprintln(os.Stdout, "Namespace:", namespace)
 }
 
-func resolveImage() string {
-	clientSet, _ = kubernetes.NewForConfig(k8sRestConfig)
+func resolveCurrentImage(ch chan<- string) {
 	if _, ok := statefulSets[microservice]; ok {
 		workload, _ := clientSet.AppsV1().StatefulSets(namespace).Get(context.Background(), workloadName, v1.GetOptions{})
-		currentImage = workload.Spec.Template.Spec.Containers[0].Image
-		return currentImage
+		ch <- workload.Spec.Template.Spec.Containers[0].Image
 	} else {
 		workload, _ := clientSet.AppsV1().Deployments(namespace).Get(context.Background(), workloadName, v1.GetOptions{})
-		currentImage = workload.Spec.Template.Spec.Containers[0].Image
-		return currentImage
+		ch <- workload.Spec.Template.Spec.Containers[0].Image
 	}
 }
 
-func getImages() (tags *google.Tags) {
+func getImages(ch chan<- *google.Tags) {
 	google.NewGcloudAuthenticator()
 	repo, _ := gcr.NewRepository(REPOSITORY+microservice, gcr.WithDefaultRegistry("us.gcr.io"))
-	tags, _ = google.List(repo, google.WithAuthFromKeychain(authn.DefaultKeychain))
-	return
+	tags, _ := google.List(repo, google.WithAuthFromKeychain(authn.DefaultKeychain))
+	ch <- tags
 }
 
 func toImageOptions(tags *google.Tags) (options []ImageOption) {
