@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -63,7 +62,7 @@ func ResolveResources() {
 
 	fmt.Fprintln(os.Stdout, "Current Image:", <-currentImageChannel)
 
-	imageOptions := sorted(toImageOptions(<-imagesChannel))
+	imageOptions := Sorted(toImageOptions(<-imagesChannel))
 	selectedImage := PromptImageSelect(imageOptions)
 	if selectedImage.IsEmpty() {
 		fmt.Fprintln(os.Stdout, "heh, ctrl+C combination was gently pressed. see you")
@@ -101,24 +100,6 @@ func getImages(ch chan<- *google.Tags) {
 	repo, _ := gcr.NewRepository(REPOSITORY+microservice, gcr.WithDefaultRegistry("us.gcr.io"))
 	tags, _ := google.List(repo, google.WithAuthFromKeychain(authn.DefaultKeychain))
 	ch <- tags
-}
-
-func toImageOptions(tags *google.Tags) (options []ImageOption) {
-	for digest, manifest := range tags.Manifests {
-		options = append(options, ImageOption{manifest.Created, manifest.Tags, digest})
-	}
-	return
-}
-
-func sorted(options []ImageOption) []ImageOption {
-	sort.SliceStable(options, sortByCreated(options))
-	return options
-}
-
-func sortByCreated(options []ImageOption) func(i, j int) bool {
-	return func(i, j int) bool {
-		return options[i].Created.After(options[j].Created)
-	}
 }
 
 func setImage(image SelectedImage) {

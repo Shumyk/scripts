@@ -1,0 +1,57 @@
+package cmd
+
+import (
+	"fmt"
+	"sort"
+	"time"
+
+	"github.com/google/go-containerregistry/pkg/v1/google"
+)
+
+type ImageOption struct {
+	Created time.Time
+	Tags    []string
+	Digest  string
+}
+
+func of(m google.ManifestInfo, d string) ImageOption {
+	return ImageOption{
+		Created: m.Created,
+		Tags:    m.Tags,
+		Digest:  d,
+	}
+}
+
+func (o ImageOption) Stringify() string {
+	return fmt.Sprintf(
+		"%v%v%v%v%v",
+		Date(o.Created), DIVIDER,
+		TrimDigestPrefix(o.Digest), DIVIDER,
+		ToString(o.Tags),
+	)
+}
+
+func Stringify(options []ImageOption) (res []string) {
+	for _, option := range options {
+		res = append(res, option.Stringify())
+	}
+	return
+}
+
+func toImageOptions(tags *google.Tags) (options []ImageOption) {
+	for digest, manifest := range tags.Manifests {
+		options = append(options, of(manifest, digest))
+	}
+	return
+}
+
+func Sorted(options []ImageOption) []ImageOption {
+	sort.SliceStable(options, sortByCreated(options))
+	return options
+}
+
+func sortByCreated(options []ImageOption) func(i, j int) bool {
+	return func(i, j int) bool {
+		return options[i].Created.After(options[j].Created)
+	}
+}
