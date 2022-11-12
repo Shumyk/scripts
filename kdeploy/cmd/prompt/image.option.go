@@ -5,6 +5,8 @@ import (
 	"sort"
 	"time"
 
+	util "shumyk/kdeploy/cmd/util"
+
 	"github.com/google/go-containerregistry/pkg/v1/google"
 )
 
@@ -25,9 +27,9 @@ func of(m google.ManifestInfo, d string) ImageOption {
 func (o ImageOption) Stringify() string {
 	return fmt.Sprintf(
 		"%v%v%v%v%v",
-		Date(o.Created), DIVIDER,
-		TrimDigestPrefix(o.Digest), DIVIDER,
-		ToString(o.Tags),
+		util.Date(o.Created), util.DIVIDER,
+		util.TrimDigestPrefix(o.Digest), util.DIVIDER,
+		util.ToString(o.Tags),
 	)
 }
 

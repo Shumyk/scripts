@@ -1,13 +1,15 @@
 package cmd
 
 import (
+	"fmt"
 	"strings"
 	"time"
 )
 
 const (
-	DIVIDER    = "     "
-	TAGS_DELIM = ","
+	DIVIDER       = "     "
+	TAGS_DELIM    = ","
+	DIGEST_PREFIX = "sha256:"
 )
 
 func Date(t time.Time) string {
@@ -15,9 +17,16 @@ func Date(t time.Time) string {
 }
 
 func TrimDigestPrefix(digest string) string {
-	return strings.TrimPrefix(digest, "sha256:")
+	return strings.TrimPrefix(digest, DIGEST_PREFIX)
 }
 
 func ToString(strs []string) string {
 	return strings.Join(strs, TAGS_DELIM)
+}
+
+func AppendSemicolon(tag string) string {
+	if len(tag) > 0 {
+		return fmt.Sprintf(":%v", tag)
+	}
+	return ""
 }

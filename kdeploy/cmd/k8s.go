@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	prompt "shumyk/kdeploy/cmd/prompt"
+	util "shumyk/kdeploy/cmd/util"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -59,9 +60,6 @@ func ResolveResources() {
 	go resolveCurrentImage(currentImageChannel)
 
 	workloadName = namespace + "-" + microservice
-	workloadResource := resolveWorkloadResource()
-	fmt.Fprintln(os.Stdout, "Workload resource:", workloadResource)
-
 	fmt.Fprintln(os.Stdout, "Current Image:", <-currentImageChannel)
 
 	imageOptions := prompt.ImageOptions(<-imagesChannel)
@@ -73,13 +71,6 @@ func ResolveResources() {
 	fmt.Fprintln(os.Stdout, "selectedImage:", selectedImage)
 
 	setImage(selectedImage)
-}
-
-func resolveWorkloadResource() string {
-	if microservice == "api-core" {
-		return "statefulset"
-	}
-	return "deployment"
 }
 
 func Namespace(config clientcmd.ClientConfig) {
@@ -105,23 +96,25 @@ func getImages(ch chan<- *google.Tags) {
 }
 
 func setImage(image prompt.SelectedImage) {
-	deployments := clientSet.AppsV1().Deployments(namespace)
-	deployment, _ := deployments.Get(context.Background(), workloadName, v1.GetOptions{})
 	newImage := fmt.Sprintf(
-		"us.gcr.io/%v%v%v@sha256:%v",
+		"us.gcr.io/%v%v%v@%v%v",
 		REPOSITORY,
 		microservice,
-		optionallyAppendSemicolon(image.Tags[0]),
+		util.AppendSemicolon(image.Tags[0]),
+		util.DIGEST_PREFIX,
 		image.Digest,
 	)
 	fmt.Fprintln(os.Stdout, "newImage:", newImage)
-	deployment.Spec.Template.Spec.Containers[0].Image = newImage
-	deployments.Update(context.Background(), deployment, v1.UpdateOptions{})
-}
 
-func optionallyAppendSemicolon(tag string) string {
-	if len(tag) > 0 {
-		return fmt.Sprintf(":%v", tag)
+	if _, ok := statefulSets[microservice]; ok {
+		statefulsets := clientSet.AppsV1().StatefulSets(namespace)
+		statefulset, _ := statefulsets.Get(context.Background(), workloadName, v1.GetOptions{})
+		statefulset.Spec.Template.Spec.Containers[0].Image = newImage
+		statefulsets.Update(context.Background(), statefulset, v1.UpdateOptions{})
+	} else {
+		deployments := clientSet.AppsV1().Deployments(namespace)
+		deployment, _ := deployments.Get(context.Background(), workloadName, v1.GetOptions{})
+		deployment.Spec.Template.Spec.Containers[0].Image = newImage
+		deployments.Update(context.Background(), deployment, v1.UpdateOptions{})
 	}
-	return ""
 }
