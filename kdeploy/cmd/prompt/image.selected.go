@@ -6,8 +6,6 @@ import (
 	"github.com/AlecAivazis/survey/v2/core"
 )
 
-const DIVIDER = "     "
-
 type SelectedImage struct {
 	Tags   []string
 	Digest string
@@ -22,7 +20,7 @@ func (i *SelectedImage) WriteAnswer(field string, answer any) error {
 	selectedImageData := strings.Split(selectedValue, DIVIDER)
 
 	i.Digest = selectedImageData[1]
-	i.Tags = strings.Split(selectedImageData[2], ",")
+	i.Tags = strings.Split(selectedImageData[2], TAGS_DELIM)
 
 	return nil
 }
