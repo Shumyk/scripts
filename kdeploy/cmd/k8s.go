@@ -10,6 +10,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
 	"github.com/google/go-containerregistry/pkg/authn"
 	gcr "github.com/google/go-containerregistry/pkg/name"
@@ -21,8 +22,7 @@ import (
 const REPOSITORY = ""
 
 var (
-	k8sClientConfig clientcmd.ClientConfig
-	clientSet       *kubernetes.Clientset
+	clientSet *kubernetes.Clientset
 
 	namespace    string
 	workloadName string
@@ -31,12 +31,22 @@ var (
 )
 
 func init() {
-	k8sConfigPath := filepath.Join(os.Getenv("HOME"), ".kube", "config")
-
+	k8sConfigPath := filepath.Join(clientcmd.RecommendedConfigDir, clientcmd.RecommendedFileName)
 	k8sConfigBypes, _ := os.ReadFile(k8sConfigPath)
-	k8sClientConfig, _ = clientcmd.NewClientConfigFromBytes(k8sConfigBypes)
-	go Namespace()
-	k8sRestConfig, _ := clientcmd.BuildConfigFromFlags("", k8sConfigPath)
+	k8sClientConfig, _ := clientcmd.NewClientConfigFromBytes(k8sConfigBypes)
+
+	go Namespace(k8sClientConfig)
+	initClientSet(k8sClientConfig)
+}
+
+func initClientSet(config clientcmd.ClientConfig) {
+	k8sRestConfig, _ := clientcmd.BuildConfigFromKubeconfigGetter(
+		"",
+		func() (*clientcmdapi.Config, error) {
+			c, err := config.RawConfig()
+			return &c, err
+		},
+	)
 	clientSet, _ = kubernetes.NewForConfig(k8sRestConfig)
 }
 
@@ -71,8 +81,8 @@ func resolveWorkloadResource() string {
 	return "deployment"
 }
 
-func Namespace() {
-	namespace, _, _ = k8sClientConfig.Namespace()
+func Namespace(config clientcmd.ClientConfig) {
+	namespace, _, _ = config.Namespace()
 	fmt.Fprintln(os.Stdout, "Namespace:", namespace)
 }
 
