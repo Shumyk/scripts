@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
+	prompt "shumyk/kdeploy/cmd/prompt"
+
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -62,8 +64,8 @@ func ResolveResources() {
 
 	fmt.Fprintln(os.Stdout, "Current Image:", <-currentImageChannel)
 
-	imageOptions := Sorted(toImageOptions(<-imagesChannel))
-	selectedImage := PromptImageSelect(imageOptions)
+	imageOptions := prompt.ImageOptions(<-imagesChannel)
+	selectedImage := prompt.PromptImageSelect(imageOptions)
 	if selectedImage.IsEmpty() {
 		fmt.Fprintln(os.Stdout, "heh, ctrl+C combination was gently pressed. see you")
 		os.Exit(0)
@@ -102,7 +104,7 @@ func getImages(ch chan<- *google.Tags) {
 	ch <- tags
 }
 
-func setImage(image SelectedImage) {
+func setImage(image prompt.SelectedImage) {
 	deployments := clientSet.AppsV1().Deployments(namespace)
 	deployment, _ := deployments.Get(context.Background(), workloadName, v1.GetOptions{})
 	newImage := fmt.Sprintf(

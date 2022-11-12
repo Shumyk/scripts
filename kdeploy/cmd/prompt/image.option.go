@@ -38,14 +38,14 @@ func Stringify(options []ImageOption) (res []string) {
 	return
 }
 
-func toImageOptions(tags *google.Tags) (options []ImageOption) {
+func ImageOptions(tags *google.Tags) (options []ImageOption) {
 	for digest, manifest := range tags.Manifests {
 		options = append(options, of(manifest, digest))
 	}
-	return
+	return sorted(options)
 }
 
-func Sorted(options []ImageOption) []ImageOption {
+func sorted(options []ImageOption) []ImageOption {
 	sort.SliceStable(options, sortByCreated(options))
 	return options
 }
