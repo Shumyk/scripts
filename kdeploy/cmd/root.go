@@ -9,6 +9,7 @@ import (
 
 var (
 	microservice string
+	previous     bool
 
 	kdeploy = cobra.Command{
 		Use:   "kdeploy microservice",
@@ -20,13 +21,19 @@ var (
 
 func run(cmd *cobra.Command, args []string) {
 	microservice = args[0]
-
-	KDeploy()
+	if previous {
+		fmt.Println("deploy previous")
+	} else {
+		KDeploy()
+	}
 }
 
 func Execute() {
 	if err := kdeploy.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+}
+
+func init() {
+	kdeploy.Flags().BoolVarP(&previous, "previous", "p", false, "deploy previous")
 }
