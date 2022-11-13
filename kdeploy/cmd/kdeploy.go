@@ -1,17 +1,18 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
 	prompt "shumyk/kdeploy/cmd/prompt"
+	printer "shumyk/kdeploy/cmd/util"
 
 	"github.com/google/go-containerregistry/pkg/v1/google"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
 func KDeploy() {
+	go printer.InitPrinter()
 	kubeConfig := resolveKubeConfig()
 
 	go Metadata(kubeConfig)
@@ -23,12 +24,9 @@ func KDeploy() {
 	go ListRepoImages(imagesChannel)
 
 	<-clientSetChannel
-	currentImage := ResolveCurrentImage()
-	fmt.Fprintln(os.Stdout, "Current Image:", currentImage)
+	printer.PrintImageInfo(ResolveCurrentImage())
 
 	selectedImage := prompt.PromptImageSelect(<-imagesChannel)
-	fmt.Fprintln(os.Stdout, "selectedImage:", selectedImage)
-
 	SetImage(selectedImage)
 }
 

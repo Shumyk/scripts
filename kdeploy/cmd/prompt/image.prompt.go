@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
+
+	printer "shumyk/kdeploy/cmd/util"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/google/go-containerregistry/pkg/v1/google"
@@ -23,7 +24,7 @@ func PromptImageSelect(tags *google.Tags) (s SelectedImage) {
 
 func terminateOnSigint(selected *SelectedImage) {
 	if selected.IsEmpty() {
-		fmt.Fprintln(os.Stdout, "heh, ctrl+C combination was gently pressed. see you")
+		printer.Purple("heh, ctrl+C combination was gently pressed. see you")
 		os.Exit(0)
 	}
 }
