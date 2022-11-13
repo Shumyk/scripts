@@ -28,18 +28,20 @@ func Purple(s string) {
 }
 
 func PrintEnvInfo(service, namespace string) {
-	wrapHeader("|   ENVIRONMENT |")
-	fmt.Printf("|   service    :  %v\t\n", green(service))
-	fmt.Printf("|   namespace  :  %v\t\n", green(namespace))
+	wrapHeader("|    ENVIRONMENT   |")
+	fmt.Printf("|   service        :  %v\t\n", green(service))
+	fmt.Printf("|   namespace      :  %v\t\n", green(namespace))
 }
 
-func PrintImageInfo(i string) {
-	wrapHeader("|   CURRENT IMAGE |")
-	imageInfo(parseImageStr(i))
+func PrintImageInfo(i string) (tag, digest string) {
+	wrapHeader("|   CURRENT IMAGE  |")
+	tag, digest = ParseImageStr(i)
+	imageInfo(tag, digest)
 	hrLine()
+	return
 }
 
-func parseImageStr(i string) (tag, digest string) {
+func ParseImageStr(i string) (tag, digest string) {
 	parts := strings.Split(i, "@")
 	tag = strings.Split(parts[0], ":")[1]
 	digest = strings.Split(parts[1], ":")[1]
@@ -53,8 +55,8 @@ func PrintDeployedImageInfo(tag, digest string) {
 }
 
 func imageInfo(tag, digest string) {
-	fmt.Printf("|   tag        :   %v\t\n", green(tag))
-	fmt.Printf("|   digest     :   %v\t\n", green(digest))
+	fmt.Printf("|   tag            :   %v\t\n", green(tag))
+	fmt.Printf("|   digest         :   %v\t\n", green(digest))
 }
 
 func hrLine() {

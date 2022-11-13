@@ -1,25 +1,40 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
+	"time"
 
-	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-func init() {
-	// kdeploy.AddCommand(previousCmd)
+type config struct {
+	Previous map[string][]PrevImage
 }
 
-var previousCmd = &cobra.Command{
-	Use:   "previous",
-	Short: "deploy-previous mode",
-	Long: `Quickly redeploy what was before your last deployment.
-However, it has goldfish memory - can redeploy only the previous deployment.`,
-	Aliases: []string{"p"},
-	Run:     runPrevious,
+type PrevImage struct {
+	Tag      string
+	Digest   string
+	Deployed time.Time
 }
 
-func runPrevious(cmd *cobra.Command, args []string) {
-	fmt.Fprintln(os.Stdout, "deploying previous")
+func PrevImageOf(tag, digest string) PrevImage {
+	return PrevImage{
+		Tag:      tag,
+		Digest:   digest,
+		Deployed: time.Now(),
+	}
+}
+
+func SavePreviouslyDeployed(tag, digest string) {
+	prevImage := PrevImageOf(tag, digest)
+
+	var conf config
+	viper.Unmarshal(&conf)
+	if conf.Previous == nil {
+		conf.Previous = make(map[string][]PrevImage)
+	}
+
+	conf.Previous[microservice] = append(conf.Previous[microservice], prevImage)
+	viper.Set("previous", conf.Previous)
+
+	viper.WriteConfig()
 }
