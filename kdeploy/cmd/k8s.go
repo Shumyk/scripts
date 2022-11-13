@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	prompt "shumyk/kdeploy/cmd/prompt"
 	util "shumyk/kdeploy/cmd/util"
@@ -12,16 +11,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
-
-	"github.com/google/go-containerregistry/pkg/authn"
-	gcr "github.com/google/go-containerregistry/pkg/name"
-	"github.com/google/go-containerregistry/pkg/v1/google"
-
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
-
-const REPOSITORY = ""
 
 var (
 	clientSet *kubernetes.Clientset
@@ -32,53 +22,12 @@ var (
 	statefulSets = map[string]any{"api-core": struct{}{}}
 )
 
-func init() {
-	k8sConfigPath := filepath.Join(clientcmd.RecommendedConfigDir, clientcmd.RecommendedFileName)
-	k8sConfigBypes, _ := os.ReadFile(k8sConfigPath)
-	k8sClientConfig, _ := clientcmd.NewClientConfigFromBytes(k8sConfigBypes)
-
-	go Namespace(k8sClientConfig)
-	initClientSet(k8sClientConfig)
-}
-
-func initClientSet(config clientcmd.ClientConfig) {
-	k8sRestConfig, _ := clientcmd.BuildConfigFromKubeconfigGetter(
-		"",
-		func() (*clientcmdapi.Config, error) {
-			c, err := config.RawConfig()
-			return &c, err
-		},
-	)
-	clientSet, _ = kubernetes.NewForConfig(k8sRestConfig)
-}
-
-func ResolveResources() {
-	imagesChannel := make(chan *google.Tags)
-	go getImages(imagesChannel)
-
-	currentImageChannel := make(chan string)
-	go resolveCurrentImage(currentImageChannel)
-
-	workloadName = namespace + "-" + microservice
-	fmt.Fprintln(os.Stdout, "Current Image:", <-currentImageChannel)
-
-	imageOptions := prompt.ImageOptions(<-imagesChannel)
-	selectedImage := prompt.PromptImageSelect(imageOptions)
-	if selectedImage.IsEmpty() {
-		fmt.Fprintln(os.Stdout, "heh, ctrl+C combination was gently pressed. see you")
-		os.Exit(0)
-	}
-	fmt.Fprintln(os.Stdout, "selectedImage:", selectedImage)
-
-	setImage(selectedImage)
-}
-
 func Namespace(config clientcmd.ClientConfig) {
 	namespace, _, _ = config.Namespace()
 	fmt.Fprintln(os.Stdout, "Namespace:", namespace)
 }
 
-func resolveCurrentImage(ch chan<- string) {
+func ResolveCurrentImage(ch chan<- string) {
 	if _, ok := statefulSets[microservice]; ok {
 		workload, _ := clientSet.AppsV1().StatefulSets(namespace).Get(context.Background(), workloadName, v1.GetOptions{})
 		ch <- workload.Spec.Template.Spec.Containers[0].Image
@@ -88,14 +37,7 @@ func resolveCurrentImage(ch chan<- string) {
 	}
 }
 
-func getImages(ch chan<- *google.Tags) {
-	google.NewGcloudAuthenticator()
-	repo, _ := gcr.NewRepository(REPOSITORY+microservice, gcr.WithDefaultRegistry("us.gcr.io"))
-	tags, _ := google.List(repo, google.WithAuthFromKeychain(authn.DefaultKeychain))
-	ch <- tags
-}
-
-func setImage(image prompt.SelectedImage) {
+func SetImage(image prompt.SelectedImage) {
 	newImage := fmt.Sprintf(
 		"us.gcr.io/%v%v%v@%v%v",
 		REPOSITORY,
