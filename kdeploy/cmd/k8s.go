@@ -76,7 +76,7 @@ func ResolveCurrentImage() string {
 	}
 }
 
-func SetImage(image prompt.SelectedImage) {
+func SetImage(image *prompt.SelectedImage) {
 	newImage := fmt.Sprintf(
 		"us.gcr.io/%v%v%v@%v%v",
 		REPOSITORY,

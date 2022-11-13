@@ -11,7 +11,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-func KDeploy() {
+func KDeploy() prompt.SelectedImage {
 	go printer.InitPrinter()
 	kubeConfig := resolveKubeConfig()
 
@@ -27,7 +27,8 @@ func KDeploy() {
 	printer.PrintImageInfo(ResolveCurrentImage())
 
 	selectedImage := prompt.PromptImageSelect(<-imagesChannel)
-	SetImage(selectedImage)
+	// SetImage(&selectedImage)
+	return selectedImage
 }
 
 func resolveKubeConfig() (c clientcmd.ClientConfig) {
