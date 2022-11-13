@@ -16,13 +16,23 @@ func init() {
 }
 
 func KDeploy() {
-	kubeConfig := resolveKubeConfig()
+	deployTemplate(deployNewSelection)
+}
 
+func deployTemplate(selecter ImageSelecter) {
+	kubeConfig := resolveKubeConfig()
 	go Metadata(kubeConfig)
 
 	clientSetChannel := make(chan bool)
 	go ClientSet(kubeConfig, clientSetChannel)
 
+	selectedImage := selecter(clientSetChannel)
+	SetImage(&selectedImage)
+}
+
+type ImageSelecter func(chan bool) prompt.SelectedImage
+
+func deployNewSelection(clientSetChannel chan bool) prompt.SelectedImage {
 	imagesChannel := make(chan *google.Tags)
 	go ListRepoImages(imagesChannel)
 
@@ -32,7 +42,7 @@ func KDeploy() {
 
 	selectedImage := prompt.PromptImageSelect(<-imagesChannel)
 	go SavePreviouslyDeployed(curTag, curDigest)
-	SetImage(&selectedImage)
+	return selectedImage
 }
 
 func resolveKubeConfig() (c clientcmd.ClientConfig) {

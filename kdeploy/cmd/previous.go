@@ -21,14 +21,15 @@ func KDeployPrev() {
 		print.Red("no available previous deployments of", microservice)
 		os.Exit(1)
 	}
+	deployTemplate(deployPrevSelection(previous))
+}
 
-	kubeConfig := resolveKubeConfig()
-	go Metadata(kubeConfig)
-	go ClientSet(kubeConfig, make(chan bool))
-
-	selectedImage := prompt.PromptPrevImageSelect(previous)
-	print.Purple(selectedImage.Digest, selectedImage.Tags)
-	SetImage(&selectedImage)
+func deployPrevSelection(p []prompt.PrevImage) ImageSelecter {
+	return func(clientSet chan bool) prompt.SelectedImage {
+		s := prompt.PromptPrevImageSelect(p)
+		<-clientSet
+		return s
+	}
 }
 
 func SavePreviouslyDeployed(tag, digest string) {
