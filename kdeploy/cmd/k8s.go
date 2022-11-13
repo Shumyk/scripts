@@ -11,6 +11,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	clapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
 var (
@@ -22,18 +23,34 @@ var (
 	statefulSets = map[string]any{"api-core": struct{}{}}
 )
 
-func Namespace(config clientcmd.ClientConfig) {
+func ClientSet(config clientcmd.ClientConfig, ch chan<- bool) {
+	k8sRestConfig, _ := clientcmd.BuildConfigFromKubeconfigGetter(
+		"", kubeconfigGetter(config),
+	)
+	clientSet, _ = kubernetes.NewForConfig(k8sRestConfig)
+	ch <- true
+}
+
+func kubeconfigGetter(c clientcmd.ClientConfig) func() (*clapi.Config, error) {
+	return func() (*clapi.Config, error) {
+		c, err := c.RawConfig()
+		return &c, err
+	}
+}
+
+func Metadata(config clientcmd.ClientConfig) {
 	namespace, _, _ = config.Namespace()
+	workloadName = namespace + "-" + microservice
 	fmt.Fprintln(os.Stdout, "Namespace:", namespace)
 }
 
-func ResolveCurrentImage(ch chan<- string) {
+func ResolveCurrentImage() string {
 	if _, ok := statefulSets[microservice]; ok {
 		workload, _ := clientSet.AppsV1().StatefulSets(namespace).Get(context.Background(), workloadName, v1.GetOptions{})
-		ch <- workload.Spec.Template.Spec.Containers[0].Image
+		return workload.Spec.Template.Spec.Containers[0].Image
 	} else {
 		workload, _ := clientSet.AppsV1().Deployments(namespace).Get(context.Background(), workloadName, v1.GetOptions{})
-		ch <- workload.Spec.Template.Spec.Containers[0].Image
+		return workload.Spec.Template.Spec.Containers[0].Image
 	}
 }
 
