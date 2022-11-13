@@ -4,10 +4,14 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	prompt "shumyk/kdeploy/cmd/prompt"
 	util "shumyk/kdeploy/cmd/util"
 
+	"github.com/fatih/color"
+
+	"golang.org/x/term"
 	apps "k8s.io/api/apps/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -57,7 +61,27 @@ func Metadata(config clientcmd.ClientConfig) {
 	namespace, _, _ = config.Namespace()
 	workloadName = namespace + "-" + microservice
 	resolveWorkloadType()
-	fmt.Fprintln(os.Stdout, "Namespace:", namespace)
+	PrintEnvInfo()
+}
+
+func PrintEnvInfo() {
+	width, _, _ := term.GetSize(int(os.Stdin.Fd()))
+	header := color.New(color.BgHiGreen).SprintFunc()
+	green := color.New(color.FgHiGreen).Add(color.Bold).SprintFunc()
+
+	hrLine(width)
+	envStr := "|   ENVIRONMENT |"
+	envHeader := envStr + strings.Repeat(" ", width-len(envStr))
+	fmt.Println(header(envHeader))
+	hrLine(width)
+	fmt.Printf("|   service  \t:  %v\t\n", green(microservice))
+	fmt.Printf("|   namespace  \t:  %v\t\n", green(namespace))
+
+	os.Exit(0)
+}
+
+func hrLine(width int) {
+	fmt.Printf("%s\n", strings.Repeat("-", width))
 }
 
 func resolveWorkloadType() {
@@ -86,7 +110,7 @@ func SetImage(image prompt.SelectedImage) {
 		util.DIGEST_PREFIX,
 		image.Digest,
 	)
-	fmt.Fprintln(os.Stdout, "newImage:", newImage)
+	fmt.Println("newImage:", newImage)
 
 	if isDeployment {
 		deployment.Spec.Template.Spec.Containers[0].Image = newImage
