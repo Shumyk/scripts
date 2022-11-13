@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -23,7 +22,7 @@ var (
 func run(cmd *cobra.Command, args []string) {
 	microservice = args[0]
 	if previous {
-		fmt.Println("deploy previous")
+		KDeployPrev()
 	} else {
 		KDeploy()
 	}

@@ -11,8 +11,11 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-func KDeploy() {
+func init() {
 	go printer.InitPrinter()
+}
+
+func KDeploy() {
 	kubeConfig := resolveKubeConfig()
 
 	go Metadata(kubeConfig)

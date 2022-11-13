@@ -9,9 +9,17 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1/google"
 )
 
-func PromptImageSelect(tags *google.Tags) (s SelectedImage) {
+func PromptImageSelect(tags *google.Tags) SelectedImage {
 	options := ImageOptions(tags)
+	return prompt(options)
+}
 
+func PromptPrevImageSelect(prevs []PrevImage) SelectedImage {
+	options := PrevImageToOptions(prevs)
+	return prompt(options)
+}
+
+func prompt(options []ImageOption) (s SelectedImage) {
 	prompt := &survey.Select{
 		Message: "select image to deploy",
 		Options: Stringify(options),

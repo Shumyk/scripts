@@ -14,6 +14,7 @@ var (
 	header func(a ...any) string
 	green  func(a ...any) string
 	purple func(a ...any) string
+	red    func(a ...any) string
 )
 
 func InitPrinter() {
@@ -21,10 +22,15 @@ func InitPrinter() {
 	header = color.New(color.BgHiGreen).SprintFunc()
 	green = color.New(color.FgHiGreen).Add(color.Bold).SprintFunc()
 	purple = color.New(color.FgMagenta).Add(color.Bold).SprintFunc()
+	red = color.New(color.FgHiRed).Add(color.Bold).SprintFunc()
 }
 
-func Purple(s string) {
+func Purple(s ...any) {
 	fmt.Println(purple(s))
+}
+
+func Red(s ...string) {
+	fmt.Fprintln(os.Stderr, red(s))
 }
 
 func PrintEnvInfo(service, namespace string) {
