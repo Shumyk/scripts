@@ -9,6 +9,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+var conf config
+
 type config struct {
 	Previous
 }
@@ -24,6 +26,17 @@ func KDeployPrev() {
 	DeployPrevious(previous)
 }
 
+func KDeployRegistryPrev() {
+	prev := getPrevious()
+	repos := make([]string, 0, len(prev))
+	for k := range prev {
+		repos = append(repos, k)
+	}
+	selectedRepo := prompt.PromptRepo(repos)
+	microservice = selectedRepo
+	KDeployPrev()
+}
+
 func SavePreviouslyDeployed(tag, digest string) {
 	prevImage := prompt.PrevImageOf(tag, digest)
 	previous := getPrevious()
@@ -34,7 +47,9 @@ func SavePreviouslyDeployed(tag, digest string) {
 }
 
 func getPrevious() Previous {
-	var conf config
+	if conf.Previous != nil {
+		return conf.Previous
+	}
 	viper.Unmarshal(&conf)
 	if conf.Previous == nil {
 		conf.Previous = make(map[string][]prompt.PrevImage)

@@ -21,7 +21,11 @@ var (
 
 func run(cmd *cobra.Command, args []string) {
 	if len(args) == 0 {
-		KDeployRegistry()
+		if previous {
+			KDeployRegistryPrev()
+		} else {
+			KDeployRegistry()
+		}
 		return
 	}
 	microservice = args[0]
