@@ -15,11 +15,15 @@ var (
 		Use:   "kdeploy microservice",
 		Short: "k[8s]deploy - deploy from the terminal",
 		Run:   run,
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 	}
 )
 
 func run(cmd *cobra.Command, args []string) {
+	if len(args) == 0 {
+		KDeployRegistry()
+		return
+	}
 	microservice = args[0]
 	if previous {
 		KDeployPrev()

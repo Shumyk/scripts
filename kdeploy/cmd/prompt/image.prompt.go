@@ -30,6 +30,15 @@ func prompt(options []ImageOption) (s SelectedImage) {
 	return
 }
 
+func PromptRepo(repos []string) (res string) {
+	prompt := &survey.Select{
+		Message: "select repo",
+		Options: repos,
+	}
+	survey.AskOne(prompt, &res)
+	return
+}
+
 func terminateOnSigint(selected *SelectedImage) {
 	if selected.IsEmpty() {
 		printer.Purple("heh, ctrl+C combination was gently pressed. see you")
