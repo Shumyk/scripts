@@ -13,7 +13,7 @@ func KDeploy() {
 	DeployNew()
 }
 
-func KDeployRegistry() {
+func KDeployWithRegistry() {
 	repos := ListRepos()
 	selectedRepo := prompt.PromptRepo(repos)
 	microservice = selectedRepo

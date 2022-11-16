@@ -26,7 +26,7 @@ func KDeployPrev() {
 	DeployPrevious(previous)
 }
 
-func KDeployRegistryPrev() {
+func KDeployPrevWithRegistry() {
 	prev := getPrevious()
 	repos := make([]string, 0, len(prev))
 	for k := range prev {
