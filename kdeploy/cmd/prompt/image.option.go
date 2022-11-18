@@ -16,11 +16,20 @@ type ImageOption struct {
 	Digest  string
 }
 
-func ImageOptionOf(m google.ManifestInfo, d string) ImageOption {
+func ImageOptionOfManifest(manifest google.ManifestInfo, digest string) ImageOption {
 	return ImageOption{
-		Created: m.Created,
-		Tags:    m.Tags,
-		Digest:  d,
+		Created: manifest.Created,
+		Tags:    manifest.Tags,
+		Digest:  digest,
+	}
+}
+
+// ImageOptionOfPrevImage TODO: converters
+func ImageOptionOfPrevImage(prevImage PrevImage) ImageOption {
+	return ImageOption{
+		prevImage.Deployed,
+		[]string{prevImage.Tag},
+		prevImage.Digest,
 	}
 }
 
@@ -33,34 +42,23 @@ func (o ImageOption) Stringify() string {
 	)
 }
 
-func Stringify(options []ImageOption) []string {
-	result := make([]string, len(options))
-	for i, option := range options {
-		result[i] = option.Stringify()
-	}
-	return result
+func Stringify(inputs []ImageOption) []string {
+	return util.SliceMapping(inputs, ImageOption.Stringify)
 }
 
 func ImageOptionsOfTags(tags *google.Tags) []ImageOption {
 	results := make([]ImageOption, len(tags.Manifests))
 	position := 0
 	for digest, manifest := range tags.Manifests {
-		results[position] = ImageOptionOf(manifest, digest)
+		results[position] = ImageOptionOfManifest(manifest, digest)
 		position++
 	}
 	return sorted(results)
 }
 
-func ImageOptionsOfPrevImages(prevs []PrevImage) []ImageOption {
-	results := make([]ImageOption, len(prevs))
-	for i, prev := range prevs {
-		results[i] = ImageOption{
-			prev.Deployed,
-			[]string{prev.Tag},
-			prev.Digest,
-		}
-	}
-	return sorted(results)
+func ImageOptionsOfPrevImages(inputs []PrevImage) []ImageOption {
+	imageOptions := util.SliceMapping(inputs, ImageOptionOfPrevImage)
+	return sorted(imageOptions)
 }
 
 func sorted(options []ImageOption) []ImageOption {
