@@ -37,7 +37,7 @@ func DeployPrevious(p []prompt.PrevImage) {
 
 func deployTemplate(selecter ImageSelecter) {
 	kubeConfig := resolveKubeConfig()
-	go Metadata(kubeConfig)
+	go LoadMetadata(kubeConfig)
 
 	clientSetChannel := make(chan bool)
 	go ClientSet(kubeConfig, clientSetChannel)

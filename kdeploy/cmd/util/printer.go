@@ -29,8 +29,9 @@ func Purple(s ...any) {
 	fmt.Println(purple(s))
 }
 
-func Red(s ...string) {
+func Error(s ...string) {
 	fmt.Fprintln(os.Stderr, red(s))
+	os.Exit(1)
 }
 
 func PrintEnvInfo(service, namespace string) {

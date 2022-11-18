@@ -26,7 +26,7 @@ func prompt(options []ImageOption) (s SelectedImage) {
 	}
 	survey.AskOne(prompt, &s)
 
-	terminateOnSigint(&s)
+	terminateOnSigint(s.Digest)
 	return
 }
 
@@ -36,11 +36,14 @@ func PromptRepo(repos []string) (res string) {
 		Options: repos,
 	}
 	survey.AskOne(prompt, &res)
+
+	terminateOnSigint(res)
 	return
 }
 
-func terminateOnSigint(selected *SelectedImage) {
-	if selected.IsEmpty() {
+// TODO: utils?
+func terminateOnSigint(result string) {
+	if len(result) == 0 {
 		printer.Purple("heh, ctrl+C combination was gently pressed. see you")
 		os.Exit(0)
 	}

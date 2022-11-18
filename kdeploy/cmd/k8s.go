@@ -52,7 +52,7 @@ func kubeconfigGetter(c clientcmd.ClientConfig) func() (*clapi.Config, error) {
 	}
 }
 
-func Metadata(config clientcmd.ClientConfig) {
+func LoadMetadata(config clientcmd.ClientConfig) {
 	namespace, _, _ = config.Namespace()
 	workloadName = namespace + "-" + microservice
 	resolveWorkloadType()
@@ -86,12 +86,14 @@ func SetImage(image *prompt.SelectedImage) {
 		image.Digest,
 	)
 
+	// TODO: uncomment
 	if isDeployment {
-		deployment.Spec.Template.Spec.Containers[0].Image = newImage
-		deployments.Update(context.Background(), deployment, meta.UpdateOptions{})
+		// deployment.Spec.Template.Spec.Containers[0].Image = newImage
+		// deployments.Update(context.Background(), deployment, meta.UpdateOptions{})
 	} else {
-		statefulSet.Spec.Template.Spec.Containers[0].Image = newImage
-		statefulSets.Update(context.Background(), statefulSet, meta.UpdateOptions{})
+		// statefulSet.Spec.Template.Spec.Containers[0].Image = newImage
+		// statefulSets.Update(context.Background(), statefulSet, meta.UpdateOptions{})
 	}
+	fmt.Println("New Image:", newImage)
 	util.PrintDeployedImageInfo(image.Tags[0], image.Digest)
 }

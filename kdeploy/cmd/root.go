@@ -1,10 +1,7 @@
 package cmd
 
 import (
-	"os"
-
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var (
@@ -42,18 +39,6 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(InitConfig)
 	kdeploy.Flags().BoolVarP(&previous, "previous", "p", false, "deploy previous")
-}
-
-func initConfig() {
-	home, err := os.UserHomeDir()
-	cobra.CheckErr(err)
-
-	viper.AddConfigPath(home)
-	viper.SetConfigType("yaml")
-	viper.SetConfigName(".kdeploy")
-
-	viper.SafeWriteConfig()
-	viper.ReadInConfig()
 }
