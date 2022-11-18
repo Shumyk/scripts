@@ -4,6 +4,7 @@ import (
 	"os"
 
 	prompt "shumyk/kdeploy/cmd/prompt"
+	util "shumyk/kdeploy/cmd/util"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -18,14 +19,9 @@ type config struct {
 
 type Previous map[string][]prompt.PrevImage
 
-func (p Previous) Keys() []string {
-	keys := make([]string, len(p))
-	position := 0
-	for key := range p {
-		keys[position] = key
-		position++
-	}
-	return keys
+func (previous Previous) Keys() []string {
+	keyMapping := util.ReturnKey[string, []prompt.PrevImage]
+	return util.MapToSliceMapping(previous, keyMapping)
 }
 
 func InitConfig() {

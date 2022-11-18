@@ -1,10 +1,13 @@
 package cmd
 
-import "os"
-
 func TerminateOnSigint(result string) {
 	if len(result) == 0 {
-		Purple("heh, ctrl+C combination was gently pressed. see you")
-		os.Exit(0)
+		Goodbye("heh, ctrl+C combination was gently pressed. see you")
+	}
+}
+
+func TerminateOnEmpty[T any](args []T, msg ...string) {
+	if len(args) == 0 {
+		Error(msg...)
 	}
 }

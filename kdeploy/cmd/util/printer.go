@@ -25,8 +25,9 @@ func InitPrinter() {
 	red = color.New(color.FgHiRed).Add(color.Bold).SprintFunc()
 }
 
-func Purple(s ...any) {
+func Goodbye(s ...any) {
 	fmt.Println(purple(s))
+	os.Exit(0)
 }
 
 func Error(s ...string) {

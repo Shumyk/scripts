@@ -16,7 +16,7 @@ type ImageOption struct {
 	Digest  string
 }
 
-func ImageOptionOfManifest(manifest google.ManifestInfo, digest string) ImageOption {
+func ImageOptionOfManifest(digest string, manifest google.ManifestInfo) ImageOption {
 	return ImageOption{
 		Created: manifest.Created,
 		Tags:    manifest.Tags,
@@ -47,13 +47,8 @@ func Stringify(inputs []ImageOption) []string {
 }
 
 func ImageOptionsOfTags(tags *google.Tags) []ImageOption {
-	results := make([]ImageOption, len(tags.Manifests))
-	position := 0
-	for digest, manifest := range tags.Manifests {
-		results[position] = ImageOptionOfManifest(manifest, digest)
-		position++
-	}
-	return sorted(results)
+	options := util.MapToSliceMapping(tags.Manifests, ImageOptionOfManifest)
+	return sorted(options)
 }
 
 func ImageOptionsOfPrevImages(inputs []PrevImage) []ImageOption {
