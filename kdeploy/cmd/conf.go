@@ -11,6 +11,7 @@ import (
 
 var conf config
 
+// TODO: add statefulsets, gcr url & path, etc
 type config struct {
 	Previous
 }

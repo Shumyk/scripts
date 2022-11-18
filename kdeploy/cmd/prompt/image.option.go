@@ -16,7 +16,7 @@ type ImageOption struct {
 	Digest  string
 }
 
-func of(m google.ManifestInfo, d string) ImageOption {
+func ImageOptionOf(m google.ManifestInfo, d string) ImageOption {
 	return ImageOption{
 		Created: m.Created,
 		Tags:    m.Tags,
@@ -33,18 +33,34 @@ func (o ImageOption) Stringify() string {
 	)
 }
 
-func Stringify(options []ImageOption) (res []string) {
-	for _, option := range options {
-		res = append(res, option.Stringify())
+func Stringify(options []ImageOption) []string {
+	result := make([]string, len(options))
+	for i, option := range options {
+		result[i] = option.Stringify()
 	}
-	return
+	return result
 }
 
-func ImageOptions(tags *google.Tags) (options []ImageOption) {
+func ImageOptionsOfTags(tags *google.Tags) []ImageOption {
+	results := make([]ImageOption, len(tags.Manifests))
+	position := 0
 	for digest, manifest := range tags.Manifests {
-		options = append(options, of(manifest, digest))
+		results[position] = ImageOptionOf(manifest, digest)
+		position++
 	}
-	return sorted(options)
+	return sorted(results)
+}
+
+func ImageOptionsOfPrevImages(prevs []PrevImage) []ImageOption {
+	results := make([]ImageOption, len(prevs))
+	for i, prev := range prevs {
+		results[i] = ImageOption{
+			prev.Deployed,
+			[]string{prev.Tag},
+			prev.Digest,
+		}
+	}
+	return sorted(results)
 }
 
 func sorted(options []ImageOption) []ImageOption {

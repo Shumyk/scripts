@@ -15,10 +15,3 @@ func PrevImageOf(tag, digest string) PrevImage {
 		Deployed: time.Now(),
 	}
 }
-
-func PrevImageToOptions(p []PrevImage) (o []ImageOption) {
-	for _, v := range p {
-		o = append(o, ImageOption{v.Deployed, []string{v.Tag}, v.Digest})
-	}
-	return sorted(o)
-}

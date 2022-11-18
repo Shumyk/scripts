@@ -1,50 +1,41 @@
 package cmd
 
 import (
-	"os"
-
-	printer "shumyk/kdeploy/cmd/util"
+	util "shumyk/kdeploy/cmd/util"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/google/go-containerregistry/pkg/v1/google"
 )
 
 func PromptImageSelect(tags *google.Tags) SelectedImage {
-	options := ImageOptions(tags)
+	options := ImageOptionsOfTags(tags)
 	return prompt(options)
 }
 
 func PromptPrevImageSelect(prevs []PrevImage) SelectedImage {
-	options := PrevImageToOptions(prevs)
+	options := ImageOptionsOfPrevImages(prevs)
 	return prompt(options)
 }
 
 func prompt(options []ImageOption) (s SelectedImage) {
-	prompt := &survey.Select{
-		Message: "select image to deploy",
-		Options: Stringify(options),
-	}
-	survey.AskOne(prompt, &s)
-
-	terminateOnSigint(s.Digest)
-	return
+	selectedImage := PromptGeneric("select image to deploy", Stringify(options))
+	return SelectedImageOf(selectedImage)
 }
 
-func PromptRepo(repos []string) (res string) {
-	prompt := &survey.Select{
-		Message: "select repo",
-		Options: repos,
-	}
+func PromptRepo(repos []string) string {
+	return PromptGeneric("select repo", repos)
+}
+
+func PromptGeneric(title string, options []string) (res string) {
+	prompt := selectPrompt(title, options)
 	survey.AskOne(prompt, &res)
-
-	terminateOnSigint(res)
+	util.TerminateOnSigint(res)
 	return
 }
 
-// TODO: utils?
-func terminateOnSigint(result string) {
-	if len(result) == 0 {
-		printer.Purple("heh, ctrl+C combination was gently pressed. see you")
-		os.Exit(0)
+func selectPrompt(title string, options []string) *survey.Select {
+	return &survey.Select{
+		Message: title,
+		Options: options,
 	}
 }
