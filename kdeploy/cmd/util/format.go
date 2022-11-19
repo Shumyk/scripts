@@ -7,11 +7,17 @@ import (
 )
 
 const (
+	// ImageOptionFormat      = 2006-01-02 15:04:05     7d639e...     tags
+	ImageOptionFormat  string = "%v" + Divider + "%v" + Divider + "%v"
 	Divider            string = "     "
 	Delimiter          string = ","
 	DigestPrefix       string = "sha256:"
 	FriendlyDateFormat string = "2006-01-02 15:04:05"
 )
+
+func FormatImageOption(date time.Time, digest string, tags ...string) string {
+	return fmt.Sprintf(ImageOptionFormat, Date(date), TrimDigestPrefix(digest), JoinComma(tags))
+}
 
 func Date(t time.Time) string {
 	return t.Format(FriendlyDateFormat)

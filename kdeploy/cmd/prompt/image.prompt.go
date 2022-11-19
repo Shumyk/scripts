@@ -7,32 +7,26 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 )
 
-type PromptInput[T any] struct {
-	Data           T
-	ToImageOptions func(T) []model.ImageOption
-}
-
-func ImageSelect[T any](input PromptInput[T]) model.SelectedImage {
-	options := input.ToImageOptions(input.Data)
-	chosenString := doPrompt(
+func ImageSelect(input []model.ImageOption) model.SelectedImage {
+	chosenString := prompt(
 		"select image to deploy",
-		model.Stringify(options),
+		model.Stringify(input),
 	)
 	return model.SelectedImageOf(chosenString)
 }
 
 func RepoSelect(repos []string) string {
-	return doPrompt("select repo", repos)
+	return prompt("select repo", repos)
 }
 
-func doPrompt(title string, options []string) (res string) {
+func prompt(title string, options []string) (selected string) {
 	prompt := &survey.Select{
 		Message: title,
 		Options: options,
 	}
-	err := survey.AskOne(prompt, &res)
+	err := survey.AskOne(prompt, &selected)
 
 	util.Laugh(err)
-	util.TerminateOnSigint(res)
+	util.TerminateOnSigint(selected)
 	return
 }
