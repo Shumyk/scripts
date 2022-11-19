@@ -28,7 +28,7 @@ func (opts ImageOptions) Sorted() ImageOptions {
 	return opts
 }
 
-func sortByCreated(options []ImageOption) func(i, j int) bool {
+func sortByCreated(options ImageOptions) func(i, j int) bool {
 	return func(i, j int) bool {
 		return options[i].Created.After(options[j].Created)
 	}

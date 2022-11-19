@@ -17,10 +17,10 @@ type config struct {
 	Previous
 }
 
-type Previous map[string][]model.PreviousImage
+type Previous map[string]model.PreviousImages
 
 func (previous Previous) Keys() []string {
-	keyMapping := util.ReturnKey[string, []model.PreviousImage]
+	keyMapping := util.ReturnKey[string, model.PreviousImages]
 	return util.MapToSliceMapping(previous, keyMapping)
 }
 
@@ -45,7 +45,7 @@ func SaveConfig(key string, value any) {
 
 func GetPrevious() Previous {
 	if conf.Previous == nil {
-		conf.Previous = make(map[string][]model.PreviousImage)
+		conf.Previous = make(map[string]model.PreviousImages)
 	}
 	return conf.Previous
 }

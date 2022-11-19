@@ -5,9 +5,8 @@ import (
 	util "shumyk/kdeploy/cmd/util"
 )
 
-func ImageOptionsOfTags(manifests map[string]google.ManifestInfo) []ImageOption {
-	var options ImageOptions = util.MapToSliceMapping(manifests, ImageOptionOfManifest)
-	return options.Sorted()
+func ImageOptionsOfTags(manifests map[string]google.ManifestInfo) ImageOptions {
+	return util.MapToSliceMapping(manifests, ImageOptionOfManifest)
 }
 
 func ImageOptionOfManifest(digest string, manifest google.ManifestInfo) ImageOption {
@@ -18,9 +17,8 @@ func ImageOptionOfManifest(digest string, manifest google.ManifestInfo) ImageOpt
 	}
 }
 
-func ImageOptionsOfPrevImages(inputs []PreviousImage) ImageOptions {
-	var imageOptions ImageOptions = util.SliceMapping(inputs, ImageOptionOfPrevImage)
-	return imageOptions.Sorted()
+func ImageOptionsOfPrevImages(inputs PreviousImages) ImageOptions {
+	return util.SliceMapping(inputs, ImageOptionOfPrevImage)
 }
 
 func ImageOptionOfPrevImage(prevImage PreviousImage) ImageOption {
