@@ -82,7 +82,7 @@ func SetImage(image *prompt.SelectedImage) {
 		REPOSITORY,
 		microservice,
 		util.AppendSemicolon(image.Tags[0]),
-		util.DIGEST_PREFIX,
+		util.DigestPrefix,
 		image.Digest,
 	)
 

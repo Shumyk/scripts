@@ -7,21 +7,22 @@ import (
 )
 
 const (
-	DIVIDER       = "     "
-	TAGS_DELIM    = ","
-	DIGEST_PREFIX = "sha256:"
+	Divider            string = "     "
+	Delimiter          string = ","
+	DigestPrefix       string = "sha256:"
+	FriendlyDateFormat string = "2006-01-02 15:04:05"
 )
 
 func Date(t time.Time) string {
-	return t.Format("2006-01-02 15:04:05")
+	return t.Format(FriendlyDateFormat)
 }
 
 func TrimDigestPrefix(digest string) string {
-	return strings.TrimPrefix(digest, DIGEST_PREFIX)
+	return strings.TrimPrefix(digest, DigestPrefix)
 }
 
-func ToString(strs []string) string {
-	return strings.Join(strs, TAGS_DELIM)
+func JoinComma(parts []string) string {
+	return strings.Join(parts, Delimiter)
 }
 
 func AppendSemicolon(tag string) string {

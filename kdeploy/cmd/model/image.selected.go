@@ -11,8 +11,8 @@ type SelectedImage struct {
 }
 
 func SelectedImageOf(value string) (i SelectedImage) {
-	selectedImageData := strings.Split(value, util.DIVIDER)
+	selectedImageData := strings.Split(value, util.Divider)
 	i.Digest = selectedImageData[1]
-	i.Tags = strings.Split(selectedImageData[2], util.TAGS_DELIM)
+	i.Tags = strings.Split(selectedImageData[2], util.Delimiter)
 	return
 }
