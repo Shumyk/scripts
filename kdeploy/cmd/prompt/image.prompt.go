@@ -13,8 +13,8 @@ const (
 )
 
 func ImageSelect(input model.ImageOptions) model.SelectedImage {
-	chosenString := prompt(ImageSelectTitle, input.Stringify())
-	return model.SelectedImageOf(chosenString)
+	chosenString := prompt(ImageSelectTitle, input.Sorted().Stringify())
+	return model.ParseSelectedImage(chosenString)
 }
 
 func RepoSelect(repos []string) string {

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"sort"
 	"time"
 
 	util "shumyk/kdeploy/cmd/util"
@@ -20,4 +21,15 @@ type ImageOptions []ImageOption
 
 func (opts ImageOptions) Stringify() []string {
 	return util.SliceMapping(opts, ImageOption.String)
+}
+
+func (opts ImageOptions) Sorted() ImageOptions {
+	sort.SliceStable(opts, sortByCreated(opts))
+	return opts
+}
+
+func sortByCreated(options []ImageOption) func(i, j int) bool {
+	return func(i, j int) bool {
+		return options[i].Created.After(options[j].Created)
+	}
 }

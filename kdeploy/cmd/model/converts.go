@@ -6,8 +6,8 @@ import (
 )
 
 func ImageOptionsOfTags(manifests map[string]google.ManifestInfo) []ImageOption {
-	options := util.MapToSliceMapping(manifests, ImageOptionOfManifest)
-	return Sorted(options)
+	var options ImageOptions = util.MapToSliceMapping(manifests, ImageOptionOfManifest)
+	return options.Sorted()
 }
 
 func ImageOptionOfManifest(digest string, manifest google.ManifestInfo) ImageOption {
@@ -18,9 +18,9 @@ func ImageOptionOfManifest(digest string, manifest google.ManifestInfo) ImageOpt
 	}
 }
 
-func ImageOptionsOfPrevImages(inputs []PreviousImage) []ImageOption {
-	imageOptions := util.SliceMapping(inputs, ImageOptionOfPrevImage)
-	return Sorted(imageOptions)
+func ImageOptionsOfPrevImages(inputs []PreviousImage) ImageOptions {
+	var imageOptions ImageOptions = util.SliceMapping(inputs, ImageOptionOfPrevImage)
+	return imageOptions.Sorted()
 }
 
 func ImageOptionOfPrevImage(prevImage PreviousImage) ImageOption {

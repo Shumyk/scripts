@@ -10,7 +10,12 @@ type SelectedImage struct {
 	Digest string
 }
 
-func SelectedImageOf(value string) (i SelectedImage) {
+// ParseSelectedImage parses selected image string to corresponding struct
+func ParseSelectedImage(value string) (i SelectedImage) {
+	// contents of array:
+	//		0: created/deployed time, not needed anymore
+	//		1: digest
+	//		2: tags, optional
 	selectedImageData := strings.Split(value, util.Divider)
 	i.Digest = selectedImageData[1]
 	i.Tags = strings.Split(selectedImageData[2], util.Delimiter)
