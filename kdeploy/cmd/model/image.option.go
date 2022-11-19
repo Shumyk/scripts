@@ -1,4 +1,4 @@
-package cmd
+package model
 
 import (
 	"fmt"
@@ -14,23 +14,6 @@ type ImageOption struct {
 	Created time.Time
 	Tags    []string
 	Digest  string
-}
-
-func ImageOptionOfManifest(digest string, manifest google.ManifestInfo) ImageOption {
-	return ImageOption{
-		Created: manifest.Created,
-		Tags:    manifest.Tags,
-		Digest:  digest,
-	}
-}
-
-// ImageOptionOfPrevImage TODO: converters
-func ImageOptionOfPrevImage(prevImage PrevImage) ImageOption {
-	return ImageOption{
-		prevImage.Deployed,
-		[]string{prevImage.Tag},
-		prevImage.Digest,
-	}
 }
 
 func (o ImageOption) Stringify() string {
@@ -51,6 +34,7 @@ func ImageOptionsOfTags(tags *google.Tags) []ImageOption {
 	return sorted(options)
 }
 
+// TODO: slice convertion to converters
 func ImageOptionsOfPrevImages(inputs []PrevImage) []ImageOption {
 	imageOptions := util.SliceMapping(inputs, ImageOptionOfPrevImage)
 	return sorted(imageOptions)

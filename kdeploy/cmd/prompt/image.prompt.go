@@ -1,25 +1,26 @@
 package cmd
 
 import (
+	"shumyk/kdeploy/cmd/model"
 	util "shumyk/kdeploy/cmd/util"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/google/go-containerregistry/pkg/v1/google"
 )
 
-func PromptImageSelect(tags *google.Tags) SelectedImage {
-	options := ImageOptionsOfTags(tags)
+func PromptImageSelect(tags *google.Tags) model.SelectedImage {
+	options := model.ImageOptionsOfTags(tags)
 	return prompt(options)
 }
 
-func PromptPrevImageSelect(prevs []PrevImage) SelectedImage {
-	options := ImageOptionsOfPrevImages(prevs)
+func PromptPrevImageSelect(prevs []model.PrevImage) model.SelectedImage {
+	options := model.ImageOptionsOfPrevImages(prevs)
 	return prompt(options)
 }
 
-func prompt(options []ImageOption) (s SelectedImage) {
-	selectedImage := PromptGeneric("select image to deploy", Stringify(options))
-	return SelectedImageOf(selectedImage)
+func prompt(options []model.ImageOption) (s model.SelectedImage) {
+	selectedImage := PromptGeneric("select image to deploy", model.Stringify(options))
+	return model.SelectedImageOf(selectedImage)
 }
 
 func PromptRepo(repos []string) string {

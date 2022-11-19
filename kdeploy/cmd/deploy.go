@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 	"path/filepath"
+	"shumyk/kdeploy/cmd/model"
 	prompt "shumyk/kdeploy/cmd/prompt"
 	printer "shumyk/kdeploy/cmd/util"
 
@@ -10,10 +11,10 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-type ImageSelecter func(chan bool) prompt.SelectedImage
+type ImageSelecter func(chan bool) model.SelectedImage
 
 func DeployNew() {
-	deployTemplate(func(clientSetChannel chan bool) prompt.SelectedImage {
+	deployTemplate(func(clientSetChannel chan bool) model.SelectedImage {
 		imagesChannel := make(chan *google.Tags)
 		go ListRepoImages(imagesChannel)
 
@@ -27,8 +28,8 @@ func DeployNew() {
 	})
 }
 
-func DeployPrevious(p []prompt.PrevImage) {
-	deployTemplate(func(clientSet chan bool) prompt.SelectedImage {
+func DeployPrevious(p []model.PrevImage) {
+	deployTemplate(func(clientSet chan bool) model.SelectedImage {
 		s := prompt.PromptPrevImageSelect(p)
 		<-clientSet
 		return s
@@ -48,7 +49,7 @@ func deployTemplate(selecter ImageSelecter) {
 
 func resolveKubeConfig() (c clientcmd.ClientConfig) {
 	k8sConfigPath := filepath.Join(clientcmd.RecommendedConfigDir, clientcmd.RecommendedFileName)
-	k8sConfigBypes, _ := os.ReadFile(k8sConfigPath)
-	c, _ = clientcmd.NewClientConfigFromBytes(k8sConfigBypes)
+	k8sConfigBytes, _ := os.ReadFile(k8sConfigPath)
+	c, _ = clientcmd.NewClientConfigFromBytes(k8sConfigBytes)
 	return
 }

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"shumyk/kdeploy/cmd/model"
 	prompt "shumyk/kdeploy/cmd/prompt"
 	util "shumyk/kdeploy/cmd/util"
 )
@@ -21,7 +22,7 @@ func KDeployPrevWithRegistry() {
 }
 
 func SavePreviouslyDeployed(tag, digest string) {
-	prevImage := prompt.PrevImageOf(tag, digest)
+	prevImage := model.PrevImageOf(tag, digest)
 	previous := GetPrevious()
 
 	previous[microservice] = append(previous[microservice], prevImage)

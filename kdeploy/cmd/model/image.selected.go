@@ -1,4 +1,4 @@
-package cmd
+package model
 
 import (
 	util "shumyk/kdeploy/cmd/util"

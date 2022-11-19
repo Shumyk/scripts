@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"os"
+	prompt "shumyk/kdeploy/cmd/model"
 
-	prompt "shumyk/kdeploy/cmd/prompt"
 	util "shumyk/kdeploy/cmd/util"
 
 	"github.com/spf13/cobra"
@@ -32,6 +32,7 @@ func InitConfig() {
 	viper.SetConfigType("yaml")
 	viper.SetConfigName(".kdeploy")
 
+	// TODO: wrap errors with descriptions and handling
 	viper.SafeWriteConfig()
 	viper.ReadInConfig()
 	viper.Unmarshal(&conf)

@@ -3,8 +3,8 @@ package cmd
 import (
 	"context"
 	"fmt"
+	prompt "shumyk/kdeploy/cmd/model"
 
-	prompt "shumyk/kdeploy/cmd/prompt"
 	util "shumyk/kdeploy/cmd/util"
 
 	apps "k8s.io/api/apps/v1"
