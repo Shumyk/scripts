@@ -18,12 +18,12 @@ func ImageOptionOfManifest(digest string, manifest google.ManifestInfo) ImageOpt
 	}
 }
 
-func ImageOptionsOfPrevImages(inputs []PrevImage) []ImageOption {
+func ImageOptionsOfPrevImages(inputs []PreviousImage) []ImageOption {
 	imageOptions := util.SliceMapping(inputs, ImageOptionOfPrevImage)
 	return Sorted(imageOptions)
 }
 
-func ImageOptionOfPrevImage(prevImage PrevImage) ImageOption {
+func ImageOptionOfPrevImage(prevImage PreviousImage) ImageOption {
 	return ImageOption{
 		Created: prevImage.Deployed,
 		Tags:    []string{prevImage.Tag},

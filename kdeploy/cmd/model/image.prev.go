@@ -2,14 +2,14 @@ package model
 
 import "time"
 
-type PrevImage struct {
+type PreviousImage struct {
 	Tag      string
 	Digest   string
 	Deployed time.Time
 }
 
-func PrevImageOf(tag, digest string) PrevImage {
-	return PrevImage{
+func PrevImageOf(tag, digest string) PreviousImage {
+	return PreviousImage{
 		Tag:      tag,
 		Digest:   digest,
 		Deployed: time.Now(),

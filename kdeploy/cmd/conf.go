@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"os"
-	prompt "shumyk/kdeploy/cmd/model"
+	model "shumyk/kdeploy/cmd/model"
 
 	util "shumyk/kdeploy/cmd/util"
 
@@ -17,10 +17,10 @@ type config struct {
 	Previous
 }
 
-type Previous map[string][]prompt.PrevImage
+type Previous map[string][]model.PreviousImage
 
 func (previous Previous) Keys() []string {
-	keyMapping := util.ReturnKey[string, []prompt.PrevImage]
+	keyMapping := util.ReturnKey[string, []model.PreviousImage]
 	return util.MapToSliceMapping(previous, keyMapping)
 }
 
@@ -45,7 +45,7 @@ func SaveConfig(key string, value any) {
 
 func GetPrevious() Previous {
 	if conf.Previous == nil {
-		conf.Previous = make(map[string][]prompt.PrevImage)
+		conf.Previous = make(map[string][]model.PreviousImage)
 	}
 	return conf.Previous
 }

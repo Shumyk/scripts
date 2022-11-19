@@ -29,7 +29,7 @@ func DeployNew() {
 	})
 }
 
-func DeployPrevious(prevImages []model.PrevImage) {
+func DeployPrevious(prevImages []model.PreviousImage) {
 	deployTemplate(func(clientSet chan bool) model.SelectedImage {
 		options := model.ImageOptionsOfPrevImages(prevImages)
 		selected := prompt.ImageSelect(options)
