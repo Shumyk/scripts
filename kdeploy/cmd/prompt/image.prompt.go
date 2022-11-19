@@ -7,16 +7,18 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 )
 
-func ImageSelect(input []model.ImageOption) model.SelectedImage {
-	chosenString := prompt(
-		"select image to deploy",
-		model.Stringify(input),
-	)
+const (
+	ImageSelectTitle = "select image to deploy"
+	RepoSelectTitle  = "select repo"
+)
+
+func ImageSelect(input model.ImageOptions) model.SelectedImage {
+	chosenString := prompt(ImageSelectTitle, input.Stringify())
 	return model.SelectedImageOf(chosenString)
 }
 
 func RepoSelect(repos []string) string {
-	return prompt("select repo", repos)
+	return prompt(RepoSelectTitle, repos)
 }
 
 func prompt(title string, options []string) (selected string) {

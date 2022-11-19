@@ -16,6 +16,8 @@ func (o ImageOption) String() string {
 	return util.FormatImageOption(o.Created, o.Digest, o.Tags...)
 }
 
-func Stringify(inputs []ImageOption) []string {
-	return util.SliceMapping(inputs, ImageOption.String)
+type ImageOptions []ImageOption
+
+func (opts ImageOptions) Stringify() []string {
+	return util.SliceMapping(opts, ImageOption.String)
 }
