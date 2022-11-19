@@ -5,38 +5,34 @@ import (
 	util "shumyk/kdeploy/cmd/util"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/google/go-containerregistry/pkg/v1/google"
 )
 
-func PromptImageSelect(tags *google.Tags) model.SelectedImage {
-	options := model.ImageOptionsOfTags(tags)
-	return prompt(options)
+type PromptInput[T any] struct {
+	Data           T
+	ToImageOptions func(T) []model.ImageOption
 }
 
-func PromptPrevImageSelect(prevs []model.PrevImage) model.SelectedImage {
-	options := model.ImageOptionsOfPrevImages(prevs)
-	return prompt(options)
+func ImageSelect[T any](input PromptInput[T]) model.SelectedImage {
+	options := input.ToImageOptions(input.Data)
+	chosenString := doPrompt(
+		"select image to deploy",
+		model.Stringify(options),
+	)
+	return model.SelectedImageOf(chosenString)
 }
 
-func prompt(options []model.ImageOption) (s model.SelectedImage) {
-	selectedImage := PromptGeneric("select image to deploy", model.Stringify(options))
-	return model.SelectedImageOf(selectedImage)
+func RepoSelect(repos []string) string {
+	return doPrompt("select repo", repos)
 }
 
-func PromptRepo(repos []string) string {
-	return PromptGeneric("select repo", repos)
-}
-
-func PromptGeneric(title string, options []string) (res string) {
-	prompt := selectPrompt(title, options)
-	survey.AskOne(prompt, &res)
-	util.TerminateOnSigint(res)
-	return
-}
-
-func selectPrompt(title string, options []string) *survey.Select {
-	return &survey.Select{
+func doPrompt(title string, options []string) (res string) {
+	prompt := &survey.Select{
 		Message: title,
 		Options: options,
 	}
+	err := survey.AskOne(prompt, &res)
+
+	util.Laugh(err)
+	util.TerminateOnSigint(res)
+	return
 }

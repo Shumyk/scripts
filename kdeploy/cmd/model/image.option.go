@@ -17,6 +17,7 @@ type ImageOption struct {
 }
 
 func (o ImageOption) Stringify() string {
+	// TODO: maybe image formats in utils
 	return fmt.Sprintf(
 		ImageOptionFormat,
 		util.Date(o.Created),

@@ -22,17 +22,26 @@ func DeployNew() {
 		currentImage := ResolveCurrentImage()
 		curTag, curDigest := printer.PrintImageInfo(currentImage)
 
-		selectedImage := prompt.PromptImageSelect(<-imagesChannel)
+		promptInput := prompt.PromptInput[map[string]google.ManifestInfo]{
+			Data:           (<-imagesChannel).Manifests,
+			ToImageOptions: model.ImageOptionsOfTags,
+		}
+		selectedImage := prompt.ImageSelect(promptInput)
 		go SavePreviouslyDeployed(curTag, curDigest)
 		return selectedImage
 	})
 }
 
-func DeployPrevious(p []model.PrevImage) {
+func DeployPrevious(prevImages []model.PrevImage) {
 	deployTemplate(func(clientSet chan bool) model.SelectedImage {
-		s := prompt.PromptPrevImageSelect(p)
+		promptInput := prompt.PromptInput[[]model.PrevImage]{
+			Data:           prevImages,
+			ToImageOptions: model.ImageOptionsOfPrevImages,
+		}
+		selected := prompt.ImageSelect(promptInput)
+
 		<-clientSet
-		return s
+		return selected
 	})
 }
 

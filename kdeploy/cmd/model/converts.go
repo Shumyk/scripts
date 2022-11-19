@@ -5,8 +5,8 @@ import (
 	util "shumyk/kdeploy/cmd/util"
 )
 
-func ImageOptionsOfTags(tags *google.Tags) []ImageOption {
-	options := util.MapToSliceMapping(tags.Manifests, ImageOptionOfManifest)
+func ImageOptionsOfTags(manifests map[string]google.ManifestInfo) []ImageOption {
+	options := util.MapToSliceMapping(manifests, ImageOptionOfManifest)
 	return Sorted(options)
 }
 

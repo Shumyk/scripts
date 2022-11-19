@@ -16,7 +16,7 @@ func KDeployPrevWithRegistry() {
 	repos := GetPrevious().Keys()
 	util.TerminateOnEmpty(repos, "no available previous deployments")
 
-	selectedRepo := prompt.PromptRepo(repos)
+	selectedRepo := prompt.RepoSelect(repos)
 	microservice = selectedRepo
 	KDeployPrev()
 }
