@@ -1,13 +1,6 @@
 package cmd
 
-import (
-	prompt "shumyk/kdeploy/cmd/prompt"
-	printer "shumyk/kdeploy/cmd/util"
-)
-
-func init() {
-	go printer.InitPrinter()
-}
+import prompt "shumyk/kdeploy/cmd/prompt"
 
 func KDeploy() {
 	DeployNew()

@@ -10,20 +10,12 @@ import (
 )
 
 var (
-	width  int
-	header func(a ...any) string
-	green  func(a ...any) string
-	purple func(a ...any) string
-	red    func(a ...any) string
+	termWidth, _, _ = term.GetSize(int(os.Stdin.Fd()))
+	header          = color.New(color.Bold, color.BgHiGreen).SprintFunc()
+	green           = color.New(color.Bold, color.FgHiGreen).SprintFunc()
+	purple          = color.New(color.Bold, color.FgMagenta).SprintFunc()
+	red             = color.New(color.Bold, color.FgHiRed).SprintFunc()
 )
-
-func InitPrinter() {
-	width, _, _ = term.GetSize(int(os.Stdin.Fd()))
-	header = color.New(color.BgHiGreen).SprintFunc()
-	green = color.New(color.FgHiGreen).Add(color.Bold).SprintFunc()
-	purple = color.New(color.FgMagenta).Add(color.Bold).SprintFunc()
-	red = color.New(color.FgHiRed).Add(color.Bold).SprintFunc()
-}
 
 func Goodbye(s ...any) {
 	fmt.Println(purple(s))
@@ -68,7 +60,7 @@ func imageInfo(tag, digest string) {
 }
 
 func hrLine() {
-	fmt.Printf("%s\n", strings.Repeat("-", width))
+	fmt.Printf("%s\n", strings.Repeat("-", termWidth))
 }
 
 func wrapHeader(head string) {
@@ -78,5 +70,5 @@ func wrapHeader(head string) {
 }
 
 func fillSpaces(s string) string {
-	return s + strings.Repeat(" ", width-len(s))
+	return s + strings.Repeat(" ", termWidth-len(s))
 }
