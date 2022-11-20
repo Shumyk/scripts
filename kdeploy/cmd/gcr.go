@@ -1,35 +1,53 @@
 package cmd
 
 import (
-	"context"
+	. "shumyk/kdeploy/cmd/util"
 	"strings"
 
-	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/google"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
+// TODO: to config
 const (
-	DEFAULT_REGISTRY = "us.gcr.io"
-	REPOSITORY       = ""
+	DefaultRegistry = "us.gcr.io"
+	Repository      = ""
 )
 
 func ListRepoImages(ch chan<- *google.Tags) {
-	google.NewGcloudAuthenticator()
-	repo, _ := name.NewRepository(REPOSITORY+microservice, name.WithDefaultRegistry(DEFAULT_REGISTRY))
-	tags, _ := google.List(repo, google.WithAuthFromKeychain(authn.DefaultKeychain))
+	_, err := google.NewGcloudAuthenticator()
+	Laugh(err)
+
+	registry := name.WithDefaultRegistry(DefaultRegistry)
+	// todo refactor rep + ms
+	repo, err := name.NewRepository(Repository+microservice, registry)
+	Laugh(err)
+
+	keychain := google.WithAuthFromKeychain(auth)
+	tags, err := google.List(repo, keychain)
+	Laugh(err)
+
 	ch <- tags
 }
 
-func ListRepos() (frepos []string) {
-	registry, _ := name.NewRegistry(DEFAULT_REGISTRY)
-	repos, _ := remote.Catalog(context.Background(), registry, remote.WithAuthFromKeychain(authn.DefaultKeychain))
+func ListRepos() (results []string) {
+	registry, err := name.NewRegistry(DefaultRegistry)
+	Laugh(err)
 
-	for _, repo := range repos {
-		if strings.HasPrefix(repo, REPOSITORY) {
-			frepos = append(frepos, strings.TrimPrefix(repo, REPOSITORY))
+	authOption := remote.WithAuthFromKeychain(auth)
+	repos, err := remote.Catalog(ctx, registry, authOption)
+	Laugh(err)
+
+	return filterRepos(repos)
+}
+
+func filterRepos(reposRaw []string) (results []string) {
+	for _, repoRaw := range reposRaw {
+		if strings.HasPrefix(repoRaw, Repository) {
+			repo := strings.TrimPrefix(repoRaw, Repository)
+			results = append(results, repo)
 		}
 	}
 	return

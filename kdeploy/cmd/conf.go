@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"context"
+	"github.com/google/go-containerregistry/pkg/authn"
 	"os"
 	"shumyk/kdeploy/cmd/model"
 
@@ -10,6 +12,11 @@ import (
 )
 
 var conf config
+
+var (
+	ctx  = context.Background()
+	auth = authn.DefaultKeychain
+)
 
 // TODO: add gcr url & path, etc
 type config struct {
