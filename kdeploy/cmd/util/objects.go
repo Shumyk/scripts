@@ -1,4 +1,4 @@
-package model
+package cmd
 
 type Entry struct {
 	Key   string

@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"shumyk/kdeploy/cmd/model"
 	"strings"
 
 	"github.com/fatih/color"
@@ -31,20 +30,20 @@ func DashLine() {
 func PrintEnvironmentInfo(service, namespace string) {
 	printInfoBlock(
 		"ENVIRONMENT",
-		model.EntryOf("service", service),
-		model.EntryOf("namespace", namespace),
+		EntryOf("service", service),
+		EntryOf("namespace", namespace),
 	)
 }
 
 func PrintImageInfo(header, tag, digest string) {
 	printInfoBlock(
 		header,
-		model.EntryOf("tag", tag),
-		model.EntryOf("digest", digest),
+		EntryOf("tag", tag),
+		EntryOf("digest", digest),
 	)
 }
 
-func printInfoBlock(header string, lines ...model.Entry) {
+func printInfoBlock(header string, lines ...Entry) {
 	wrapHeader(buildHeaderLine(header))
 	for _, line := range lines {
 		fmt.Println(buildInfoLine(line.Key, green(line.Value)))
