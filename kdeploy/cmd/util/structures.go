@@ -22,6 +22,6 @@ func MapToSliceMapping[K comparable, V, O any](inputs map[K]V, from MapToSlice[K
 	return
 }
 
-func ReturnKey[K, V any](key K, value V) K {
+func ReturnKey[K, V any](key K, ignored V) K {
 	return key
 }
