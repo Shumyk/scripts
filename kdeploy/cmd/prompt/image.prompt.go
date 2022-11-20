@@ -12,8 +12,9 @@ const (
 	RepoSelectTitle  = "select repo"
 )
 
-func ImageSelect(input model.ImageOptions) model.SelectedImage {
-	chosenString := prompt(ImageSelectTitle, input.Sorted().Stringify())
+func ImageSelect(input model.PromptInputs) model.SelectedImage {
+	options := input.ImageOptions().Sorted().Stringify()
+	chosenString := prompt(ImageSelectTitle, options)
 	return model.ParseSelectedImage(chosenString)
 }
 
