@@ -8,7 +8,7 @@ import (
 
 const (
 	// ImageOptionFormat      = 2006-01-02 15:04:05     7d639e...     tags
-	ImageOptionFormat  string = "%v" + Divider + "%v" + Divider + "%v"
+	ImageOptionFormat         = "%v" + Divider + "%v" + Divider + "%v"
 	Divider            string = "     "
 	Delimiter          string = ","
 	DigestPrefix       string = "sha256:"
