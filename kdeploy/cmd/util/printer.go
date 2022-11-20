@@ -3,13 +3,18 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"shumyk/kdeploy/cmd/model"
 	"strings"
 
 	"github.com/fatih/color"
 	"golang.org/x/term"
 )
 
-const LengthInfoLine = 19
+const (
+	LengthInfoLine      = 19
+	HeaderCurrentImage  = "CURRENT IMAGE"
+	HeaderDeployedImage = "DEPLOYED IMAGE"
+)
 
 var (
 	termWidth, _, _ = term.GetSize(int(os.Stdin.Fd()))
@@ -17,9 +22,6 @@ var (
 	green           = color.New(color.Bold, color.FgHiGreen).SprintFunc()
 	purple          = color.New(color.Bold, color.FgMagenta).SprintFunc()
 	red             = color.New(color.Bold, color.FgHiRed).SprintFunc()
-
-	CurrentImageHeader  = "CURRENT IMAGE"
-	DeployedImageHeader = "DEPLOYED IMAGE"
 )
 
 func DashLine() {
@@ -27,16 +29,26 @@ func DashLine() {
 }
 
 func PrintEnvironmentInfo(service, namespace string) {
-	wrapHeader(buildHeaderLine("ENVIRONMENT"))
-	fmt.Println(buildInfoLine("service", green(service)))
-	fmt.Println(buildInfoLine("namespace", green(namespace)))
-	DashLine()
+	printInfoBlock(
+		"ENVIRONMENT",
+		model.EntryOf("service", service),
+		model.EntryOf("namespace", namespace),
+	)
 }
 
-func PrintImageInfo(tag, digest, header string) {
+func PrintImageInfo(header, tag, digest string) {
+	printInfoBlock(
+		header,
+		model.EntryOf("tag", tag),
+		model.EntryOf("digest", digest),
+	)
+}
+
+func printInfoBlock(header string, lines ...model.Entry) {
 	wrapHeader(buildHeaderLine(header))
-	fmt.Println(buildInfoLine("tag", green(tag)))
-	fmt.Println(buildInfoLine("digest", green(digest)))
+	for _, line := range lines {
+		fmt.Println(buildInfoLine(line.Key, green(line.Value)))
+	}
 	DashLine()
 }
 

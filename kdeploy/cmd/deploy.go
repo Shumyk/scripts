@@ -23,7 +23,7 @@ func DeployNew() {
 		currentImage := ResolveCurrentImage()
 		tag, digest := util.ParseImageStr(currentImage)
 		defer SavePreviouslyDeployed(tag, digest)
-		util.PrintImageInfo(tag, digest, util.CurrentImageHeader)
+		util.PrintImageInfo(util.HeaderCurrentImage, tag, digest)
 
 		var manifests model.Manifests = (<-imagesChannel).Manifests
 		selectedImage := prompt.ImageSelect(manifests)

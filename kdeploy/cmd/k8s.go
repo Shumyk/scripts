@@ -95,5 +95,5 @@ func SetImage(image *prompt.SelectedImage) {
 		// statefulSets.Update(context.Background(), statefulSet, meta.UpdateOptions{})
 	}
 	fmt.Println("New Image:", newImage)
-	util.PrintImageInfo(image.Tags[0], image.Digest, util.DeployedImageHeader)
+	util.PrintImageInfo(util.HeaderDeployedImage, image.Tags[0], image.Digest)
 }
