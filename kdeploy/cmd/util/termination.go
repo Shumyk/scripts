@@ -7,7 +7,7 @@ import (
 
 func TerminateOnSigint(result string) {
 	if len(result) == 0 {
-		Goodbye("heh, ctrl+C combination was gently pressed. see you")
+		Goodbye("heh, ctrl+c combination was gently pressed. see you")
 	}
 }
 
