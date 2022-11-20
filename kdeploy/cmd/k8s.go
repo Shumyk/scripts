@@ -56,7 +56,7 @@ func LoadMetadata(config clientcmd.ClientConfig) {
 	namespace, _, _ = config.Namespace()
 	workloadName = namespace + "-" + microservice
 	resolveWorkloadType()
-	util.PrintEnvInfo(microservice, namespace)
+	util.PrintEnvironmentInfo(microservice, namespace)
 }
 
 func resolveWorkloadType() {

@@ -9,6 +9,8 @@ import (
 	"golang.org/x/term"
 )
 
+const LengthInfoLine = 19
+
 var (
 	termWidth, _, _ = term.GetSize(int(os.Stdin.Fd()))
 	header          = color.New(color.Bold, color.BgHiGreen).SprintFunc()
@@ -22,19 +24,21 @@ func Goodbye(s ...any) {
 	os.Exit(0)
 }
 
-func Error(s ...string) {
-	fmt.Fprintln(os.Stderr, red(s))
+func Error(s ...any) {
+	_, _ = fmt.Fprintln(os.Stderr, red(s))
 	os.Exit(1)
 }
 
-func PrintEnvInfo(service, namespace string) {
-	wrapHeader("|    ENVIRONMENT   |")
-	fmt.Printf("|   service        :  %v\t\n", green(service))
-	fmt.Printf("|   namespace      :  %v\t\n", green(namespace))
+go down
+func PrintEnvironmentInfo(service, namespace string) {
+	wrapHeader(buildHeader("ENVIRONMENT"))
+	fmt.Println(buildInfoLine("service", green(service)))
+	fmt.Println(buildInfoLine("namespace", green(namespace)))
+	hrLine()
 }
 
 func PrintImageInfo(i string) (tag, digest string) {
-	wrapHeader("|   CURRENT IMAGE  |")
+	wrapHeader(buildHeader("CURRENT IMAGE"))
 	tag, digest = ParseImageStr(i)
 	imageInfo(tag, digest)
 	hrLine()
@@ -49,14 +53,14 @@ func ParseImageStr(i string) (tag, digest string) {
 }
 
 func PrintDeployedImageInfo(tag, digest string) {
-	wrapHeader("    DEPLOYED IMAGE |")
+	wrapHeader(buildHeader("DEPLOYED IMAGE"))
 	imageInfo(tag, digest)
 	hrLine()
 }
 
 func imageInfo(tag, digest string) {
-	fmt.Printf("|   tag            :   %v\t\n", green(tag))
-	fmt.Printf("|   digest         :   %v\t\n", green(digest))
+	fmt.Println(buildInfoLine("tag", green(tag)))
+	fmt.Println(buildInfoLine("digest", green(digest)))
 }
 
 func hrLine() {
@@ -72,3 +76,24 @@ func wrapHeader(head string) {
 func fillSpaces(s string) string {
 	return s + strings.Repeat(" ", termWidth-len(s))
 }
+
+// terminal indentation helpers
+// ↓↓↓						↓↓↓
+func buildLine(msg, suffix string) string {
+	prefix := fmt.Sprintf("|   %v", msg)
+	freeSpace := LengthInfoLine - len(prefix)
+	spaces := strings.Repeat(" ", freeSpace)
+	return fmt.Sprintf("%v%v%v", prefix, spaces, suffix)
+}
+
+func buildHeader(header string) string {
+	return buildLine(header, "|")
+}
+
+func buildInfoLine(key, value string) string {
+	suffix := fmt.Sprintf(":  %v", value)
+	return buildLine(key, suffix)
+}
+
+// end terminal indentation helpers
+// ↑↑↑				        ↑↑↑

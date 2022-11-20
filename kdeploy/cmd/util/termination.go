@@ -11,7 +11,7 @@ func TerminateOnSigint(result string) {
 	}
 }
 
-func TerminateOnEmpty[T any](args []T, msg ...string) {
+func TerminateOnEmpty[T any](args []T, msg ...any) {
 	if len(args) == 0 {
 		Error(msg...)
 	}
