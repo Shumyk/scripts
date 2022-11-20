@@ -16,7 +16,7 @@ var (
 	}
 )
 
-func run(cmd *cobra.Command, args []string) {
+func run(_ *cobra.Command, args []string) {
 	if len(args) == 0 {
 		if previous {
 			KDeployPrevWithRegistry()

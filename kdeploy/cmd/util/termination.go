@@ -17,6 +17,7 @@ func TerminateOnEmpty[T any](args []T, msg ...any) {
 	}
 }
 
+// Laugh just prints error message if present and ignores it
 func Laugh(err error) {
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, "Error:", err)

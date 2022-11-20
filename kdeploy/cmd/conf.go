@@ -2,18 +2,18 @@ package cmd
 
 import (
 	"os"
-	model "shumyk/kdeploy/cmd/model"
+	"shumyk/kdeploy/cmd/model"
 
 	util "shumyk/kdeploy/cmd/util"
 
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var conf config
 
-// TODO: add statefulsets, gcr url & path, etc
+// TODO: add gcr url & path, etc
 type config struct {
+	StatefulSets []string
 	Previous
 }
 
@@ -26,21 +26,20 @@ func (previous Previous) Keys() []string {
 
 func InitConfig() {
 	home, err := os.UserHomeDir()
-	cobra.CheckErr(err)
+	util.Laugh(err)
 
 	viper.AddConfigPath(home)
-	viper.SetConfigType("yaml")
 	viper.SetConfigName(".kdeploy")
+	viper.SetConfigType("yaml")
 
-	// TODO: wrap errors with descriptions and handling
-	viper.SafeWriteConfig()
-	viper.ReadInConfig()
-	viper.Unmarshal(&conf)
+	util.Laugh(viper.SafeWriteConfig())
+	util.Laugh(viper.ReadInConfig())
+	util.Laugh(viper.Unmarshal(&conf))
 }
 
 func SaveConfig(key string, value any) {
 	viper.Set(key, value)
-	viper.WriteConfig()
+	util.Laugh(viper.WriteConfig())
 }
 
 func GetPrevious() Previous {
