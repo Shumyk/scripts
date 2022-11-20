@@ -25,27 +25,29 @@ var (
 	namespace    string
 	workloadName string
 
+	getOpts    = meta.GetOptions{}
 	updateOpts = meta.UpdateOptions{}
 )
 
 func ClientSet(config clientcmd.ClientConfig, ch chan<- bool) {
-	k8sRestConfig, _ := clientcmd.BuildConfigFromKubeconfigGetter(
-		"", kubeconfigGetter(config),
-	)
-	clientSet, _ = kubernetes.NewForConfig(k8sRestConfig)
+	k8sRestConfig, err := clientcmd.BuildConfigFromKubeconfigGetter("", kubeConfigGetter(config))
+	util.ErrorCheck(err)
+	clientSet, err = kubernetes.NewForConfig(k8sRestConfig)
+	util.ErrorCheck(err)
 
+	apps := clientSet.AppsV1()
 	if isDeployment {
-		deployments = clientSet.AppsV1().Deployments(namespace)
-		deployment, _ = deployments.Get(ctx, workloadName, meta.GetOptions{})
+		deployments = apps.Deployments(namespace)
+		deployment, _ = deployments.Get(ctx, workloadName, getOpts)
 	} else {
-		statefulSets = clientSet.AppsV1().StatefulSets(namespace)
-		statefulSet, _ = statefulSets.Get(ctx, workloadName, meta.GetOptions{})
+		statefulSets = apps.StatefulSets(namespace)
+		statefulSet, _ = statefulSets.Get(ctx, workloadName, getOpts)
 	}
 
 	ch <- true
 }
 
-func kubeconfigGetter(c clientcmd.ClientConfig) func() (*clapi.Config, error) {
+func kubeConfigGetter(c clientcmd.ClientConfig) func() (*clapi.Config, error) {
 	return func() (*clapi.Config, error) {
 		c, err := c.RawConfig()
 		return &c, err
@@ -53,9 +55,12 @@ func kubeconfigGetter(c clientcmd.ClientConfig) func() (*clapi.Config, error) {
 }
 
 func LoadMetadata(config clientcmd.ClientConfig) {
-	namespace, _, _ = config.Namespace()
+	namespace, _, err := config.Namespace()
+	util.ErrorCheck(err)
+
 	workloadName = namespace + "-" + microservice
 	resolveWorkloadType()
+
 	util.PrintEnvironmentInfo(microservice, namespace)
 }
 
@@ -68,10 +73,10 @@ func resolveWorkloadType() {
 
 func ResolveCurrentImage() string {
 	if isDeployment {
-		workload, _ := deployments.Get(ctx, workloadName, meta.GetOptions{})
+		workload, _ := deployments.Get(ctx, workloadName, getOpts)
 		return workload.Spec.Template.Spec.Containers[0].Image
 	} else {
-		workload, _ := statefulSets.Get(ctx, workloadName, meta.GetOptions{})
+		workload, _ := statefulSets.Get(ctx, workloadName, getOpts)
 		return workload.Spec.Template.Spec.Containers[0].Image
 	}
 }
