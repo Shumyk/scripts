@@ -29,6 +29,12 @@ func Goodbye(s ...any) {
 	os.Exit(0)
 }
 
+func ErrorCheck(err error) {
+	if err != nil {
+		Error(err)
+	}
+}
+
 func Error(s ...any) {
 	_, _ = fmt.Fprintln(os.Stderr, red(s))
 	os.Exit(1)

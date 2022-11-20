@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"context"
-	"fmt"
 	prompt "shumyk/kdeploy/cmd/model"
 
 	util "shumyk/kdeploy/cmd/util"
@@ -26,6 +24,8 @@ var (
 
 	namespace    string
 	workloadName string
+
+	updateOpts = meta.UpdateOptions{}
 )
 
 func ClientSet(config clientcmd.ClientConfig, ch chan<- bool) {
@@ -36,10 +36,10 @@ func ClientSet(config clientcmd.ClientConfig, ch chan<- bool) {
 
 	if isDeployment {
 		deployments = clientSet.AppsV1().Deployments(namespace)
-		deployment, _ = deployments.Get(context.Background(), workloadName, meta.GetOptions{})
+		deployment, _ = deployments.Get(ctx, workloadName, meta.GetOptions{})
 	} else {
 		statefulSets = clientSet.AppsV1().StatefulSets(namespace)
-		statefulSet, _ = statefulSets.Get(context.Background(), workloadName, meta.GetOptions{})
+		statefulSet, _ = statefulSets.Get(ctx, workloadName, meta.GetOptions{})
 	}
 
 	ch <- true
@@ -68,32 +68,24 @@ func resolveWorkloadType() {
 
 func ResolveCurrentImage() string {
 	if isDeployment {
-		workload, _ := deployments.Get(context.Background(), workloadName, meta.GetOptions{})
+		workload, _ := deployments.Get(ctx, workloadName, meta.GetOptions{})
 		return workload.Spec.Template.Spec.Containers[0].Image
 	} else {
-		workload, _ := statefulSets.Get(context.Background(), workloadName, meta.GetOptions{})
+		workload, _ := statefulSets.Get(ctx, workloadName, meta.GetOptions{})
 		return workload.Spec.Template.Spec.Containers[0].Image
 	}
 }
 
 func SetImage(image *prompt.SelectedImage) {
-	newImage := fmt.Sprintf(
-		"us.gcr.io/%v%v%v@%v%v",
-		Repository,
-		microservice,
-		util.AppendSemicolon(image.Tags[0]),
-		util.DigestPrefix,
-		image.Digest,
-	)
-
-	// TODO: uncomment
+	var newImage = util.ComposeImagePath(Registry, Repository, microservice, image.Tag(), image.Digest)
+	var updateError error
 	if isDeployment {
-		// deployment.Spec.Template.Spec.Containers[0].Image = newImage
-		// deployments.Update(context.Background(), deployment, meta.UpdateOptions{})
+		deployment.Spec.Template.Spec.Containers[0].Image = newImage
+		_, updateError = deployments.Update(ctx, deployment, updateOpts)
 	} else {
-		// statefulSet.Spec.Template.Spec.Containers[0].Image = newImage
-		// statefulSets.Update(context.Background(), statefulSet, meta.UpdateOptions{})
+		statefulSet.Spec.Template.Spec.Containers[0].Image = newImage
+		_, updateError = statefulSets.Update(ctx, statefulSet, updateOpts)
 	}
-	fmt.Println("New Image:", newImage)
+	util.ErrorCheck(updateError)
 	util.PrintImageInfo(util.HeaderDeployedImage, image.Tags[0], image.Digest)
 }

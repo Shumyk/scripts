@@ -10,6 +10,13 @@ type SelectedImage struct {
 	Digest string
 }
 
+func (i SelectedImage) Tag() string {
+	if len(i.Tags) != 0 {
+		return i.Tags[0]
+	}
+	return ""
+}
+
 // ParseSelectedImage parses selected image string to corresponding struct
 func ParseSelectedImage(value string) (i SelectedImage) {
 	// contents of array:

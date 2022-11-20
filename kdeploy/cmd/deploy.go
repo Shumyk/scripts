@@ -21,7 +21,7 @@ func DeployNew() {
 		<-clientSetChannel
 
 		currentImage := ResolveCurrentImage()
-		tag, digest := util.ParseImageStr(currentImage)
+		tag, digest := util.ParseImagePath(currentImage)
 		defer SavePreviouslyDeployed(tag, digest)
 		util.PrintImageInfo(util.HeaderCurrentImage, tag, digest)
 

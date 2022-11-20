@@ -33,7 +33,7 @@ func JoinComma(parts []string) string {
 
 func AppendSemicolon(tag string) string {
 	if len(tag) > 0 {
-		return fmt.Sprintf(":%v", tag)
+		return ":" + tag
 	}
 	return ""
 }
