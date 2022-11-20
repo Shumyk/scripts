@@ -17,64 +17,39 @@ var (
 	green           = color.New(color.Bold, color.FgHiGreen).SprintFunc()
 	purple          = color.New(color.Bold, color.FgMagenta).SprintFunc()
 	red             = color.New(color.Bold, color.FgHiRed).SprintFunc()
+
+	CurrentImageHeader  = "CURRENT IMAGE"
+	DeployedImageHeader = "DEPLOYED IMAGE"
 )
 
-func Goodbye(s ...any) {
-	fmt.Println(purple(s))
-	os.Exit(0)
+func DashLine() {
+	fmt.Printf("%s", strings.Repeat("-", termWidth))
 }
 
-func Error(s ...any) {
-	_, _ = fmt.Fprintln(os.Stderr, red(s))
-	os.Exit(1)
-}
-
-go down
 func PrintEnvironmentInfo(service, namespace string) {
-	wrapHeader(buildHeader("ENVIRONMENT"))
+	wrapHeader(buildHeaderLine("ENVIRONMENT"))
 	fmt.Println(buildInfoLine("service", green(service)))
 	fmt.Println(buildInfoLine("namespace", green(namespace)))
-	hrLine()
+	DashLine()
 }
 
-func PrintImageInfo(i string) (tag, digest string) {
-	wrapHeader(buildHeader("CURRENT IMAGE"))
-	tag, digest = ParseImageStr(i)
-	imageInfo(tag, digest)
-	hrLine()
-	return
-}
-
-func ParseImageStr(i string) (tag, digest string) {
-	parts := strings.Split(i, "@")
-	tag = strings.Split(parts[0], ":")[1]
-	digest = strings.Split(parts[1], ":")[1]
-	return
-}
-
-func PrintDeployedImageInfo(tag, digest string) {
-	wrapHeader(buildHeader("DEPLOYED IMAGE"))
-	imageInfo(tag, digest)
-	hrLine()
-}
-
-func imageInfo(tag, digest string) {
+func PrintImageInfo(tag, digest, header string) {
+	wrapHeader(buildHeaderLine(header))
 	fmt.Println(buildInfoLine("tag", green(tag)))
 	fmt.Println(buildInfoLine("digest", green(digest)))
+	DashLine()
 }
 
-func hrLine() {
-	fmt.Printf("%s\n", strings.Repeat("-", termWidth))
+func wrapHeader(title string) {
+	DashLine()
+	line := withTrailingWhitespaces(title)
+	fmt.Println(header(line))
+	DashLine()
 }
 
-func wrapHeader(head string) {
-	hrLine()
-	fmt.Println(header(fillSpaces(head)))
-	hrLine()
-}
-
-func fillSpaces(s string) string {
-	return s + strings.Repeat(" ", termWidth-len(s))
+func withTrailingWhitespaces(prefix string) string {
+	trailingWhitespaces := strings.Repeat(" ", termWidth-len(prefix))
+	return fmt.Sprintf("%v%v", prefix, trailingWhitespaces)
 }
 
 // terminal indentation helpers
@@ -86,7 +61,7 @@ func buildLine(msg, suffix string) string {
 	return fmt.Sprintf("%v%v%v", prefix, spaces, suffix)
 }
 
-func buildHeader(header string) string {
+func buildHeaderLine(header string) string {
 	return buildLine(header, "|")
 }
 
@@ -95,5 +70,5 @@ func buildInfoLine(key, value string) string {
 	return buildLine(key, suffix)
 }
 
+// ↑↑↑				      	    ↑↑↑
 // end terminal indentation helpers
-// ↑↑↑				        ↑↑↑

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"shumyk/kdeploy/cmd/model"
 	prompt "shumyk/kdeploy/cmd/prompt"
-	printer "shumyk/kdeploy/cmd/util"
+	util "shumyk/kdeploy/cmd/util"
 
 	"github.com/google/go-containerregistry/pkg/v1/google"
 	"k8s.io/client-go/tools/clientcmd"
@@ -19,12 +19,14 @@ func DeployNew() {
 		go ListRepoImages(imagesChannel)
 
 		<-clientSetChannel
+
 		currentImage := ResolveCurrentImage()
-		curTag, curDigest := printer.PrintImageInfo(currentImage)
+		tag, digest := util.ParseImageStr(currentImage)
+		defer SavePreviouslyDeployed(tag, digest)
+		util.PrintImageInfo(tag, digest, util.CurrentImageHeader)
 
 		var manifests model.Manifests = (<-imagesChannel).Manifests
 		selectedImage := prompt.ImageSelect(manifests)
-		go SavePreviouslyDeployed(curTag, curDigest)
 		return selectedImage
 	})
 }

@@ -22,3 +22,13 @@ func Laugh(err error) {
 		_, _ = fmt.Fprintln(os.Stderr, "Error:", err)
 	}
 }
+
+func Goodbye(s ...any) {
+	fmt.Println(purple(s))
+	os.Exit(0)
+}
+
+func Error(s ...any) {
+	_, _ = fmt.Fprintln(os.Stderr, red(s))
+	os.Exit(1)
+}
