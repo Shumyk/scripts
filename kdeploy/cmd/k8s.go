@@ -17,19 +17,18 @@ import (
 var (
 	clientSet *kubernetes.Clientset
 
-	k8sResource string
-
 	namespace       string
+	k8sResource     string
 	k8sResourceName string
 )
 
 func ClientSet(config clientcmd.ClientConfig, ch chan<- bool) {
 	configGetter := kubeConfigGetter(config)
 	k8sRestConfig, err := clientcmd.BuildConfigFromKubeconfigGetter("", configGetter)
-	util.ErrorCheck(err)
+	util.ErrorCheck(err, "Building config from kube config getter failed")
 
 	clientSet, err = kubernetes.NewForConfig(k8sRestConfig)
-	util.ErrorCheck(err)
+	util.ErrorCheck(err, "Creating Client Set failed")
 
 	ch <- true
 }
@@ -42,9 +41,9 @@ func kubeConfigGetter(c clientcmd.ClientConfig) clientcmd.KubeconfigGetter {
 }
 
 func LoadMetadata(config clientcmd.ClientConfig) {
-	nm, _, err := config.Namespace()
-	util.ErrorCheck(err)
-	namespace = nm
+	var err error
+	namespace, _, err = config.Namespace()
+	util.ErrorCheck(err, "Resolving namespace failed")
 
 	k8sResourceName = namespace + "-" + microservice
 	resolveWorkloadType()
@@ -60,7 +59,6 @@ func resolveWorkloadType() {
 	} else {
 		k8sResource = "deployments"
 	}
-	//isDeployment = !ok
 }
 
 func GetImage() string {
@@ -72,7 +70,7 @@ func GetImage() string {
 		Name(k8sResourceName).
 		Do(ctx).
 		Into(&response)
-	util.ErrorCheck(err)
+	util.ErrorCheck(err, "GET image failed")
 	return response.Spec.Template.Spec.Containers[0].Image
 }
 
@@ -80,7 +78,7 @@ func SetImage(image *SelectedImage) {
 	newImage := util.ComposeImagePath(Registry, Repository, microservice, image.Tag(), image.Digest)
 	imageChange := composeImagePatch(newImage)
 	data, err := json.Marshal(imageChange)
-	util.ErrorCheck(err)
+	util.ErrorCheck(err, "Unmarshalling image change failed")
 
 	updateError := clientSet.AppsV1().RESTClient().
 		Patch(types.StrategicMergePatchType).
@@ -91,8 +89,7 @@ func SetImage(image *SelectedImage) {
 		Do(ctx).
 		Error()
 
-	// TODO: add source message everywhere
-	util.ErrorCheck(updateError, "Set image failed")
+	util.ErrorCheck(updateError, "PATCH image failed")
 	util.PrintImageInfo(util.HeaderDeployedImage, image.Tags[0], image.Digest)
 }
 
