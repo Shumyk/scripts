@@ -18,27 +18,27 @@ const (
 
 func ListRepoImages(ch chan<- *google.Tags) {
 	_, err := google.NewGcloudAuthenticator()
-	Laugh(err)
+	ErrorCheck(err, "Gcloud authentication failed")
 
 	registry := name.WithDefaultRegistry(Registry)
 	// todo refactor rep + ms
 	repo, err := name.NewRepository(Repository+microservice, registry)
-	Laugh(err)
+	ErrorCheck(err, "Obtaining new repository failed")
 
 	keychain := google.WithAuthFromKeychain(auth)
 	tags, err := google.List(repo, keychain)
-	Laugh(err)
+	ErrorCheck(err, "Listing tags failed")
 
 	ch <- tags
 }
 
 func ListRepos() (results []string) {
 	registry, err := name.NewRegistry(Registry)
-	Laugh(err)
+	ErrorCheck(err, "Obtaining new registry failed")
 
 	authOption := remote.WithAuthFromKeychain(auth)
 	repos, err := remote.Catalog(ctx, registry, authOption)
-	Laugh(err)
+	ErrorCheck(err)
 
 	return filterRepos(repos)
 }
