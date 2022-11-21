@@ -113,20 +113,7 @@ func GetImage() string {
 
 func SetImage(image *prompt.SelectedImage) {
 	newImage := util.ComposeImagePath(Registry, Repository, microservice, image.Tag(), image.Digest)
-
-	imageChange := confApps.DeploymentApplyConfiguration{
-		Spec: &confApps.DeploymentSpecApplyConfiguration{
-			Template: &core.PodTemplateSpecApplyConfiguration{
-				Spec: &core.PodSpecApplyConfiguration{
-					Containers: []core.ContainerApplyConfiguration{{
-						Image: &newImage,
-						Name:  &microservice,
-					}},
-				},
-			},
-		},
-	}
-
+	imageChange := composeImagePatch(newImage)
 	data, err := json.Marshal(imageChange)
 	util.ErrorCheck(err)
 
@@ -142,4 +129,15 @@ func SetImage(image *prompt.SelectedImage) {
 	// TODO: add source message everywhere
 	util.ErrorCheck(updateError, "Set image failed")
 	util.PrintImageInfo(util.HeaderDeployedImage, image.Tags[0], image.Digest)
+}
+
+// composeImagePatch composes resource apply configuration to patch only image.
+// DeploymentApplyConfiguration is used, but it's actually resource agnostic as we patch only image,
+// which is located under same place among resources.
+func composeImagePatch(newImage string) confApps.DeploymentApplyConfiguration {
+	container := core.ContainerApplyConfiguration{Image: &newImage, Name: &microservice}
+	podSpec := core.PodSpecApplyConfiguration{Containers: []core.ContainerApplyConfiguration{container}}
+	templateSpec := core.PodTemplateSpecApplyConfiguration{Spec: &podSpec}
+	resourceSpec := confApps.DeploymentSpecApplyConfiguration{Template: &templateSpec}
+	return confApps.DeploymentApplyConfiguration{Spec: &resourceSpec}
 }
