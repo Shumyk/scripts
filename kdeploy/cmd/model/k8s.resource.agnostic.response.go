@@ -1,19 +1,18 @@
 package model
 
 import (
-	v12 "k8s.io/api/apps/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	apps "k8s.io/api/apps/v1"
+	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type K8sResourceAgnosticResponse struct {
-	v1.TypeMeta   `json:",inline"`
-	v1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+	meta.TypeMeta   `json:",inline"`
+	meta.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 
-	Spec v12.DeploymentSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+	Spec apps.DeploymentSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
 }
 
-// TODO: maybe generated?
 func (in *K8sResourceAgnosticResponse) DeepCopy() *K8sResourceAgnosticResponse {
 	if in == nil {
 		return nil
