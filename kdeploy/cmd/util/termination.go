@@ -29,9 +29,9 @@ func Goodbye(s ...any) {
 	os.Exit(0)
 }
 
-func ErrorCheck(err error) {
+func ErrorCheck(err error, msg ...string) {
 	if err != nil {
-		Error(err)
+		Error(err, msg)
 	}
 }
 

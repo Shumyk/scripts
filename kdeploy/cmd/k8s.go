@@ -1,29 +1,29 @@
 package cmd
 
 import (
+	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	prompt "shumyk/kdeploy/cmd/model"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/json"
+	confApps "k8s.io/client-go/applyconfigurations/apps/v1"
+	core "k8s.io/client-go/applyconfigurations/core/v1"
 
+	prompt "shumyk/kdeploy/cmd/model"
 	util "shumyk/kdeploy/cmd/util"
 
-	appsV1 "k8s.io/api/apps/v1"
-	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8sApps "k8s.io/api/apps/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-	clapi "k8s.io/client-go/tools/clientcmd/api"
+	"k8s.io/client-go/tools/clientcmd/api"
 )
 
 var (
 	clientSet *kubernetes.Clientset
 
-	isDeployment bool
-	k8sResource  string
+	k8sResource string
 
 	namespace       string
 	k8sResourceName string
-
-	getOpts    = meta.GetOptions{}
-	updateOpts = meta.UpdateOptions{}
 )
 
 func ClientSet(config clientcmd.ClientConfig, ch chan<- bool) {
@@ -38,7 +38,7 @@ func ClientSet(config clientcmd.ClientConfig, ch chan<- bool) {
 }
 
 func kubeConfigGetter(c clientcmd.ClientConfig) clientcmd.KubeconfigGetter {
-	return func() (*clapi.Config, error) {
+	return func() (*api.Config, error) {
 		c, err := c.RawConfig()
 		return &c, err
 	}
@@ -70,7 +70,7 @@ type k8sResourceAgnosticResponse struct {
 	meta.TypeMeta   `json:",inline"`
 	meta.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 
-	Spec appsV1.DeploymentSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+	Spec k8sApps.DeploymentSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
 }
 
 // TODO: maybe generated?
@@ -112,15 +112,34 @@ func GetImage() string {
 }
 
 func SetImage(image *prompt.SelectedImage) {
-	var newImage = util.ComposeImagePath(Registry, Repository, microservice, image.Tag(), image.Digest)
-	var updateError error
-	if isDeployment {
-		deployment.Spec.Template.Spec.Containers[0].Image = newImage
-		_, updateError = deployments.Update(ctx, deployment, updateOpts)
-	} else {
-		statefulSet.Spec.Template.Spec.Containers[0].Image = newImage
-		_, updateError = statefulSets.Update(ctx, statefulSet, updateOpts)
+	newImage := util.ComposeImagePath(Registry, Repository, microservice, image.Tag(), image.Digest)
+
+	imageChange := confApps.DeploymentApplyConfiguration{
+		Spec: &confApps.DeploymentSpecApplyConfiguration{
+			Template: &core.PodTemplateSpecApplyConfiguration{
+				Spec: &core.PodSpecApplyConfiguration{
+					Containers: []core.ContainerApplyConfiguration{{
+						Image: &newImage,
+						Name:  &microservice,
+					}},
+				},
+			},
+		},
 	}
-	util.ErrorCheck(updateError)
+
+	data, err := json.Marshal(imageChange)
+	util.ErrorCheck(err)
+
+	updateError := clientSet.AppsV1().RESTClient().
+		Patch(types.StrategicMergePatchType).
+		Namespace(namespace).
+		Resource(k8sResource).
+		Name(k8sResourceName).
+		Body(data).
+		Do(ctx).
+		Error()
+
+	// TODO: add source message everywhere
+	util.ErrorCheck(updateError, "Set image failed")
 	util.PrintImageInfo(util.HeaderDeployedImage, image.Tags[0], image.Digest)
 }
