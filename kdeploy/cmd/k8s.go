@@ -7,7 +7,7 @@ import (
 	core "k8s.io/client-go/applyconfigurations/core/v1"
 
 	. "shumyk/kdeploy/cmd/model"
-	util "shumyk/kdeploy/cmd/util"
+	. "shumyk/kdeploy/cmd/util"
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -25,10 +25,10 @@ var (
 func ClientSet(config clientcmd.ClientConfig, ch chan<- bool) {
 	configGetter := kubeConfigGetter(config)
 	k8sRestConfig, err := clientcmd.BuildConfigFromKubeconfigGetter("", configGetter)
-	util.ErrorCheck(err, "Building config from kube config getter failed")
+	ErrorCheck(err, "Building config from kube config getter failed")
 
 	clientSet, err = kubernetes.NewForConfig(k8sRestConfig)
-	util.ErrorCheck(err, "Creating Client Set failed")
+	ErrorCheck(err, "Creating Client Set failed")
 
 	ch <- true
 }
@@ -43,12 +43,12 @@ func kubeConfigGetter(c clientcmd.ClientConfig) clientcmd.KubeconfigGetter {
 func LoadMetadata(config clientcmd.ClientConfig) {
 	var err error
 	namespace, _, err = config.Namespace()
-	util.ErrorCheck(err, "Resolving namespace failed")
+	ErrorCheck(err, "Resolving namespace failed")
 
 	k8sResourceName = namespace + "-" + microservice
 	resolveWorkloadType()
 
-	util.PrintEnvironmentInfo(microservice, namespace)
+	PrintEnvironmentInfo(microservice, namespace)
 }
 
 func resolveWorkloadType() {
@@ -70,15 +70,15 @@ func GetImage() string {
 		Name(k8sResourceName).
 		Do(ctx).
 		Into(&response)
-	util.ErrorCheck(err, "GET image failed")
+	ErrorCheck(err, "GET image failed")
 	return response.Spec.Template.Spec.Containers[0].Image
 }
 
 func SetImage(image *SelectedImage) {
-	newImage := util.ComposeImagePath(Registry, Repository, microservice, image.Tag(), image.Digest)
+	newImage := ComposeImagePath(Registry, Repository, microservice, image.Tag(), image.Digest)
 	imageChange := composeImagePatch(newImage)
 	data, err := json.Marshal(imageChange)
-	util.ErrorCheck(err, "Unmarshalling image change failed")
+	ErrorCheck(err, "Unmarshalling image change failed")
 
 	updateError := clientSet.AppsV1().RESTClient().
 		Patch(types.StrategicMergePatchType).
@@ -89,8 +89,8 @@ func SetImage(image *SelectedImage) {
 		Do(ctx).
 		Error()
 
-	util.ErrorCheck(updateError, "PATCH image failed")
-	util.PrintImageInfo(util.HeaderDeployedImage, image.Tags[0], image.Digest)
+	ErrorCheck(updateError, "PATCH image failed")
+	PrintImageInfo(HeaderDeployedImage, image.Tags[0], image.Digest)
 }
 
 // composeImagePatch composes resource apply configuration to patch only image.
