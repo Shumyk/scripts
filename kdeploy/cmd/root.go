@@ -5,6 +5,7 @@ import (
 )
 
 var (
+	// TODO: move this
 	microservice string
 	previous     bool
 
@@ -19,14 +20,14 @@ var (
 func run(_ *cobra.Command, args []string) {
 	if len(args) == 0 {
 		if previous {
-			KDeployPrevWithRegistry()
+			KDeployPreviousWithRegistry()
 		} else {
 			KDeployWithRegistry()
 		}
 	} else {
 		microservice = args[0]
 		if previous {
-			KDeployPrev()
+			KDeployPrevious()
 		} else {
 			KDeploy()
 		}

@@ -5,17 +5,16 @@ import (
 	. "shumyk/kdeploy/cmd/util"
 )
 
-func KDeployPrev() {
+func KDeployPrevious() {
 	previous := GetPrevious()[microservice]
-	TerminateOnEmpty(previous, "no available previous deployments of", microservice)
+	TerminateOnEmpty(previous, "previous deployments of", microservice, "absent")
 	DeployPrevious(previous)
 }
 
-func KDeployPrevWithRegistry() {
+func KDeployPreviousWithRegistry() {
 	repos := GetPrevious().Keys()
-	TerminateOnEmpty(repos, "no available previous deployments")
+	TerminateOnEmpty(repos, "previous deployments absent")
 
-	selectedRepo := prompt.RepoSelect(repos)
-	microservice = selectedRepo
-	KDeployPrev()
+	microservice = prompt.RepoSelect(repos)
+	KDeployPrevious()
 }
