@@ -8,7 +8,6 @@ func KDeploy() {
 
 func KDeployWithRegistry() {
 	repos := ListRepos()
-	selectedRepo := prompt.RepoSelect(repos)
-	microservice = selectedRepo
-	KDeploy()
+	microservice = prompt.RepoSelect(repos)
+	DeployNew()
 }
