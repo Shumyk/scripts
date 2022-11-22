@@ -19,18 +19,26 @@ var (
 
 func run(_ *cobra.Command, args []string) {
 	if len(args) == 0 {
-		if previousMode {
-			KDeployPreviousWithRegistry()
-		} else {
-			KDeployWithRegistry()
-		}
+		deploySelectingRegistry()
 	} else {
-		microservice = args[0]
-		if previousMode {
-			KDeployPrevious()
-		} else {
-			KDeploy()
-		}
+		deployMicroservice(args)
+	}
+}
+
+func deploySelectingRegistry() {
+	if previousMode {
+		KDeployPreviousWithRegistry()
+	} else {
+		KDeployWithRegistry()
+	}
+}
+
+func deployMicroservice(args []string) {
+	microservice = args[0]
+	if previousMode {
+		KDeployPrevious()
+	} else {
+		KDeploy()
 	}
 }
 
