@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"context"
+	"github.com/google/go-containerregistry/pkg/authn"
 	. "shumyk/kdeploy/cmd/util"
 	"strings"
 
@@ -14,6 +16,11 @@ import (
 const (
 	Registry   = "us.gcr.io"
 	Repository = ""
+)
+
+var (
+	ctx  = context.Background()
+	auth = authn.DefaultKeychain
 )
 
 func ListRepoImages(ch chan<- *google.Tags) {
