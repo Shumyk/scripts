@@ -44,6 +44,14 @@ func InitConfig() {
 	util.Laugh(viper.Unmarshal(&conf))
 }
 
+func SavePreviouslyDeployed(tag, digest string) {
+	prevImage := model.PrevImageOf(tag, digest)
+	previous := GetPrevious()
+
+	previous[microservice] = append(previous[microservice], prevImage)
+	SaveConfig("previous", previous)
+}
+
 func SaveConfig(key string, value any) {
 	viper.Set(key, value)
 	util.Laugh(viper.WriteConfig())
