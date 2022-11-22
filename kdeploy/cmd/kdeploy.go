@@ -9,16 +9,16 @@ func KDeploy() {
 	DeployNew()
 }
 
-func KDeployPrevious() {
-	previous := GetPrevious()[microservice]
-	TerminateOnEmpty(previous, "previous deployments of", microservice, "absent")
-	DeployPrevious(previous)
-}
-
 func KDeployWithRegistry() {
 	repos := ListRepos()
 	microservice = prompt.RepoSelect(repos)
 	DeployNew()
+}
+
+func KDeployPrevious() {
+	previous := GetPrevious()[microservice]
+	TerminateOnEmpty(previous, "previous deployments of", microservice, "absent")
+	DeployPrevious(previous)
 }
 
 func KDeployPreviousWithRegistry() {
