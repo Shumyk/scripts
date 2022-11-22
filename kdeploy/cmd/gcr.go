@@ -12,12 +12,6 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-// TODO: to config
-const (
-	Registry   = "us.gcr.io"
-	Repository = ""
-)
-
 var (
 	ctx  = context.Background()
 	auth = authn.DefaultKeychain
@@ -27,9 +21,8 @@ func ListRepoImages(ch chan<- *google.Tags) {
 	_, err := google.NewGcloudAuthenticator()
 	ErrorCheck(err, "Gcloud authentication failed")
 
-	registry := name.WithDefaultRegistry(Registry)
-	// todo refactor rep + ms
-	repo, err := name.NewRepository(Repository+microservice, registry)
+	registry := name.WithDefaultRegistry(Registry())
+	repo, err := name.NewRepository(BuildRepository(microservice), registry)
 	ErrorCheck(err, "Obtaining new repository failed")
 
 	keychain := google.WithAuthFromKeychain(auth)
@@ -40,7 +33,7 @@ func ListRepoImages(ch chan<- *google.Tags) {
 }
 
 func ListRepos() (results []string) {
-	registry, err := name.NewRegistry(Registry)
+	registry, err := name.NewRegistry(Registry())
 	ErrorCheck(err, "Obtaining new registry failed")
 
 	authOption := remote.WithAuthFromKeychain(auth)
@@ -52,8 +45,8 @@ func ListRepos() (results []string) {
 
 func filterRepos(reposRaw []string) (results []string) {
 	for _, repoRaw := range reposRaw {
-		if strings.HasPrefix(repoRaw, Repository) {
-			repo := strings.TrimPrefix(repoRaw, Repository)
+		if strings.HasPrefix(repoRaw, Repository()) {
+			repo := strings.TrimPrefix(repoRaw, Repository())
 			results = append(results, repo)
 		}
 	}

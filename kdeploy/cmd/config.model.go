@@ -5,10 +5,11 @@ import (
 	. "shumyk/kdeploy/cmd/util"
 )
 
-// Configuration TODO: add gcr url & path, etc
-type Configuration struct {
-	StatefulSets []string
-	Previous     PreviousDeployments
+type configuration struct {
+	registry     string
+	repository   string
+	statefulSets []string
+	previous     PreviousDeployments
 }
 
 type PreviousDeployments map[string]PreviousImages

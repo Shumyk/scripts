@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var config Configuration
+var config configuration
 
 func InitConfig() {
 	home, err := os.UserHomeDir()
@@ -38,8 +38,20 @@ func SaveDeployedImage(tag, digest string) {
 }
 
 func GetPreviousDeployments() PreviousDeployments {
-	if config.Previous == nil {
-		config.Previous = make(map[string]PreviousImages)
+	if config.previous == nil {
+		config.previous = make(map[string]PreviousImages)
 	}
-	return config.Previous
+	return config.previous
+}
+
+func Registry() string {
+	return config.registry
+}
+
+func Repository() string {
+	return config.repository
+}
+
+func BuildRepository(service string) string {
+	return config.repository + service
 }
