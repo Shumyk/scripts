@@ -5,6 +5,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/json"
 	confApps "k8s.io/client-go/applyconfigurations/apps/v1"
 	core "k8s.io/client-go/applyconfigurations/core/v1"
+	"os"
+	"path/filepath"
 
 	. "shumyk/kdeploy/cmd/model"
 	. "shumyk/kdeploy/cmd/util"
@@ -22,6 +24,27 @@ var (
 	k8sResource     string
 	k8sResourceName string
 )
+
+func CreateClientConfigFromKubeConfig() clientcmd.ClientConfig {
+	k8sConfigPath := filepath.Join(clientcmd.RecommendedConfigDir, clientcmd.RecommendedFileName)
+	k8sConfigBytes, err := os.ReadFile(k8sConfigPath)
+	ErrorCheck(err, "Couldn't read kube config")
+
+	conf, err := clientcmd.NewClientConfigFromBytes(k8sConfigBytes)
+	ErrorCheck(err, "Failed creating new API server client")
+	return conf
+}
+
+func LoadMetadata(config clientcmd.ClientConfig) {
+	var err error
+	namespace, _, err = config.Namespace()
+	ErrorCheck(err, "Resolving namespace failed")
+
+	k8sResourceName = namespace + "-" + microservice
+	resolveWorkloadType()
+
+	PrintEnvironmentInfo(microservice, namespace)
+}
 
 func ClientSet(config clientcmd.ClientConfig, ch chan<- bool) {
 	configGetter := kubeConfigGetter(config)
@@ -41,17 +64,6 @@ func kubeConfigGetter(c clientcmd.ClientConfig) clientcmd.KubeconfigGetter {
 	}
 }
 
-func LoadMetadata(config clientcmd.ClientConfig) {
-	var err error
-	namespace, _, err = config.Namespace()
-	ErrorCheck(err, "Resolving namespace failed")
-
-	k8sResourceName = namespace + "-" + microservice
-	resolveWorkloadType()
-
-	PrintEnvironmentInfo(microservice, namespace)
-}
-
 func resolveWorkloadType() {
 	// TODO: statefulsets from config
 	statefulSets := map[string]any{"api-core": struct{}{}}
@@ -62,7 +74,7 @@ func resolveWorkloadType() {
 	}
 }
 
-func GetImage() string {
+func GetImage() (tag, digest string) {
 	var response K8sResourceAgnosticResponse
 	err := clientSet.AppsV1().RESTClient().
 		Get().
@@ -72,7 +84,9 @@ func GetImage() string {
 		Do(ctx).
 		Into(&response)
 	ErrorCheck(err, "GET image failed")
-	return response.Spec.Template.Spec.Containers[0].Image
+
+	imagePath := response.Spec.Template.Spec.Containers[0].Image
+	return ParseImagePath(imagePath)
 }
 
 func SetImage(image *SelectedImage) {

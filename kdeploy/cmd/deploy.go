@@ -1,58 +1,53 @@
 package cmd
 
 import (
-	"os"
-	"path/filepath"
-	"shumyk/kdeploy/cmd/model"
+	. "shumyk/kdeploy/cmd/model"
 	prompt "shumyk/kdeploy/cmd/prompt"
-	util "shumyk/kdeploy/cmd/util"
+	. "shumyk/kdeploy/cmd/util"
 
 	"github.com/google/go-containerregistry/pkg/v1/google"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
-type ImageSelecter func(chan bool) model.SelectedImage
+type ImageSelecter func(<-chan bool) SelectedImage
 
-func DeployNew() {
-	deployTemplate(func(clientSetChannel chan bool) model.SelectedImage {
-		imagesChannel := make(chan *google.Tags)
-		go ListRepoImages(imagesChannel)
+func deployTemplate(selectImage ImageSelecter) {
+	clientConfig := CreateClientConfigFromKubeConfig()
+	go LoadMetadata(clientConfig)
 
-		<-clientSetChannel
+	clientSetCreatedChannel := make(chan bool)
+	go ClientSet(clientConfig, clientSetCreatedChannel)
 
-		currentImage := GetImage()
-		tag, digest := util.ParseImagePath(currentImage)
-		defer SavePreviouslyDeployed(tag, digest)
-		util.PrintImageInfo(util.HeaderCurrentImage, tag, digest)
+	selectedImage := selectImage(clientSetCreatedChannel)
 
-		var manifests model.Manifests = (<-imagesChannel).Manifests
-		selectedImage := prompt.ImageSelect(manifests)
-		return selectedImage
-	})
-}
-
-func DeployPrevious(prevImages model.PreviousImages) {
-	deployTemplate(func(clientSet chan bool) model.SelectedImage {
-		selected := prompt.ImageSelect(prevImages)
-		<-clientSet
-		return selected
-	})
-}
-
-func deployTemplate(selecter ImageSelecter) {
-	kubeConfig := resolveKubeConfig()
-	go LoadMetadata(kubeConfig)
-
-	clientSetChannel := make(chan bool)
-	go ClientSet(kubeConfig, clientSetChannel)
-
-	selectedImage := selecter(clientSetChannel)
 	SetImage(&selectedImage)
 }
 
-func resolveKubeConfig() (c clientcmd.ClientConfig) {
-	k8sConfigPath := filepath.Join(clientcmd.RecommendedConfigDir, clientcmd.RecommendedFileName)
-	k8sConfigBytes, _ := os.ReadFile(k8sConfigPath)
-	c, _ = clientcmd.NewClientConfigFromBytes(k8sConfigBytes)
-	return
+func DeployNew() {
+	deployTemplate(newImageSelecter)
+}
+
+func newImageSelecter(clientSetCreated <-chan bool) SelectedImage {
+	images := make(chan *google.Tags)
+	go ListRepoImages(images)
+
+	<-clientSetCreated
+	tag, digest := GetImage()
+	defer SavePreviouslyDeployed(tag, digest)
+	PrintImageInfo(HeaderCurrentImage, tag, digest)
+
+	var manifests Manifests = (<-images).Manifests
+	return prompt.ImageSelect(manifests)
+}
+
+func DeployPrevious(images PreviousImages) {
+	deployTemplate(previousImageSelecter(images))
+}
+
+func previousImageSelecter(images PreviousImages) ImageSelecter {
+	return func(clientSetCreated <-chan bool) SelectedImage {
+		selected := prompt.ImageSelect(images)
+		// wait for client set to be created, as next line outside is setting image
+		<-clientSetCreated
+		return selected
+	}
 }
