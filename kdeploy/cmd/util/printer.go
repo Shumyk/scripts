@@ -65,6 +65,7 @@ func withTrailingWhitespaces(prefix string) string {
 
 // terminal indentation helpers
 // ↓↓↓						↓↓↓
+
 func buildLine(msg, suffix string) string {
 	prefix := fmt.Sprintf("|   %v", msg)
 	freeSpace := LengthInfoLine - len(prefix)
@@ -83,3 +84,17 @@ func buildInfoLine(key, value string) string {
 
 // ↑↑↑				      	    ↑↑↑
 // end terminal indentation helpers
+
+// colors
+// ↓↓↓						↓↓↓
+
+func Boring(msg ...any) {
+	fmt.Println(msg...)
+}
+
+func Red(msg any) {
+	fmt.Println(red(msg))
+}
+
+// ↑↑↑				      	    ↑↑↑
+// colors

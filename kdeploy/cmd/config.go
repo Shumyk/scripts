@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+	"github.com/spf13/cobra"
 	"os"
 
 	. "shumyk/kdeploy/cmd/model"
@@ -11,7 +13,7 @@ import (
 
 var config configuration
 
-func InitConfig() {
+func InitConfig(cobra *cobra.Command) {
 	home, err := os.UserHomeDir()
 	Laugh(err)
 
@@ -22,6 +24,31 @@ func InitConfig() {
 	_ = viper.SafeWriteConfig()
 	Laugh(viper.ReadInConfig())
 	Laugh(viper.Unmarshal(&config))
+
+	validateVitalConfigs(cobra)
+}
+
+func validateVitalConfigs(cobra *cobra.Command) {
+	// TODO: fix, not loading config
+	fmt.Println(config.registry, config.previous)
+	if len(config.registry) == 0 {
+		// TODO: stderr
+		Red("Registry not found in " + viper.ConfigFileUsed())
+		Boring("You can add it using:")
+		Boring("	kdeploy config set registry us.gcr.io")
+		Boring("Or manually editing " + viper.ConfigFileUsed())
+		Boring("	vim " + viper.ConfigFileUsed())
+		os.Exit(1)
+	}
+	if len(config.repository) == 0 {
+		Red("Repository not found in " + viper.ConfigFileUsed())
+		Boring("You can add it using:")
+		Boring("	kdeploy config set repository umbrella-infra/umbrella/umbrella")
+		Boring("Or manually editing " + viper.ConfigFileUsed())
+		Boring("	vim " + viper.ConfigFileUsed())
+		os.Exit(1)
+	}
+	// TODO: implement for registry, repository
 }
 
 func SaveConfig(key string, value any) {

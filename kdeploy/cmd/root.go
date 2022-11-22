@@ -17,7 +17,8 @@ var (
 	}
 )
 
-func run(_ *cobra.Command, args []string) {
+func run(cmd *cobra.Command, args []string) {
+	InitConfig(cmd)
 	if len(args) == 0 {
 		deploySelectingRegistry()
 	} else {
@@ -48,6 +49,6 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(InitConfig)
+	// cobra.OnInitialize(InitConfig)
 	kdeploy.Flags().BoolVarP(&previousMode, "previous", "p", false, "deploy previous")
 }
