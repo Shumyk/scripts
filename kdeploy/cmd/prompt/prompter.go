@@ -8,18 +8,18 @@ import (
 )
 
 const (
-	ImageSelectTitle = "select image to deploy"
-	RepoSelectTitle  = "select repo"
+	imageSelectTitle = "select image to deploy"
+	repoSelectTitle  = "select repo"
 )
 
 func ImageSelect(input model.PromptInputs) model.SelectedImage {
 	options := input.ImageOptions().Sorted().Stringify()
-	chosenString := prompt(ImageSelectTitle, options)
+	chosenString := prompt(imageSelectTitle, options)
 	return model.ParseSelectedImage(chosenString)
 }
 
 func RepoSelect(repos []string) string {
-	return prompt(RepoSelectTitle, repos)
+	return prompt(repoSelectTitle, repos)
 }
 
 func prompt(title string, options []string) (selected string) {
