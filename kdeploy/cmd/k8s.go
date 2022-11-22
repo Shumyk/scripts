@@ -18,6 +18,7 @@ var (
 	clientSet *kubernetes.Clientset
 
 	namespace       string
+	microservice    string
 	k8sResource     string
 	k8sResourceName string
 )

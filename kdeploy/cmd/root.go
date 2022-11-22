@@ -2,13 +2,13 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	. "shumyk/kdeploy/cmd/util"
 )
 
 var (
-	// TODO: move this
-	microservice string
-	previous     bool
+	previousMode bool
 
+	// TODO: more info here needed
 	kdeploy = cobra.Command{
 		Use:   "kdeploy microservice",
 		Short: "k[8s]deploy - deploy from the terminal",
@@ -19,14 +19,14 @@ var (
 
 func run(_ *cobra.Command, args []string) {
 	if len(args) == 0 {
-		if previous {
+		if previousMode {
 			KDeployPreviousWithRegistry()
 		} else {
 			KDeployWithRegistry()
 		}
 	} else {
 		microservice = args[0]
-		if previous {
+		if previousMode {
 			KDeployPrevious()
 		} else {
 			KDeploy()
@@ -36,10 +36,10 @@ func run(_ *cobra.Command, args []string) {
 
 func Execute() {
 	err := kdeploy.Execute()
-	cobra.CheckErr(err)
+	ErrorCheck(err, "Failed to execute kdeploy :|")
 }
 
 func init() {
 	cobra.OnInitialize(InitConfig)
-	kdeploy.Flags().BoolVarP(&previous, "previous", "p", false, "deploy previous")
+	kdeploy.Flags().BoolVarP(&previousMode, "previous", "p", false, "deploy previous")
 }
