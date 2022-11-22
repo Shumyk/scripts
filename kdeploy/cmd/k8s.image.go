@@ -25,7 +25,7 @@ func GetImage() (tag, digest string) {
 }
 
 func SetImage(image *SelectedImage) {
-	newImage := ComposeImagePath(Registry, Repository, microservice, image.Tag(), image.Digest)
+	newImage := ComposeImagePath(Registry(), Repository(), microservice, image.Tag(), image.Digest)
 	imageChange := composeImagePatch(newImage)
 	data, err := json.Marshal(imageChange)
 	ErrorCheck(err, "Unmarshalling image change failed")
