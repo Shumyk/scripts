@@ -32,7 +32,7 @@ func newImageSelecter(clientSetCreated <-chan bool) SelectedImage {
 
 	<-clientSetCreated
 	tag, digest := GetImage()
-	defer SavePreviouslyDeployed(tag, digest)
+	defer SaveDeployedImage(tag, digest)
 	PrintImageInfo(HeaderCurrentImage, tag, digest)
 
 	var manifests Manifests = (<-images).Manifests
