@@ -82,12 +82,11 @@ func BuildRepository(service string) string {
 	return config.Repository + service
 }
 
-func ResolveResourceType() string {
-	// TODO: statefulsets from config
-	statefulSets := map[string]any{"api-core": struct{}{}}
-	if _, ok := statefulSets[microservice]; ok {
-		k8sResource = "statefulsets"
-	} else {
-		k8sResource = "deployments"
+func ResolveResourceType(service string) string {
+	for _, statefulSet := range config.StatefulSets {
+		if statefulSet == service {
+			return "statefulsets"
+		}
 	}
+	return "deployments"
 }

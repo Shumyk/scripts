@@ -36,7 +36,7 @@ func LoadMetadata(config clientcmd.ClientConfig) {
 	ErrorCheck(err, "Resolving namespace failed")
 
 	k8sResourceName = namespace + "-" + microservice
-	k8sResource = ResolveResourceType()
+	k8sResource = ResolveResourceType(microservice)
 
 	PrintEnvironmentInfo(microservice, namespace)
 }
