@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
 	"os"
 
@@ -29,9 +28,7 @@ func InitConfig(cobra *cobra.Command) {
 }
 
 func validateVitalConfigs(cobra *cobra.Command) {
-	// TODO: fix, not loading config
-	fmt.Println(config.registry, config.previous)
-	if len(config.registry) == 0 {
+	if len(config.Registry) == 0 {
 		// TODO: stderr
 		Red("Registry not found in " + viper.ConfigFileUsed())
 		Boring("You can add it using:")
@@ -40,7 +37,7 @@ func validateVitalConfigs(cobra *cobra.Command) {
 		Boring("	vim " + viper.ConfigFileUsed())
 		os.Exit(1)
 	}
-	if len(config.repository) == 0 {
+	if len(config.Repository) == 0 {
 		Red("Repository not found in " + viper.ConfigFileUsed())
 		Boring("You can add it using:")
 		Boring("	kdeploy config set repository umbrella-infra/umbrella/umbrella")
@@ -48,6 +45,8 @@ func validateVitalConfigs(cobra *cobra.Command) {
 		Boring("	vim " + viper.ConfigFileUsed())
 		os.Exit(1)
 	}
+	Boring("works")
+	os.Exit(0)
 	// TODO: implement for registry, repository
 }
 
@@ -65,20 +64,30 @@ func SaveDeployedImage(tag, digest string) {
 }
 
 func GetPreviousDeployments() PreviousDeployments {
-	if config.previous == nil {
-		config.previous = make(map[string]PreviousImages)
+	if config.Previous == nil {
+		config.Previous = make(map[string]PreviousImages)
 	}
-	return config.previous
+	return config.Previous
 }
 
 func Registry() string {
-	return config.registry
+	return config.Registry
 }
 
 func Repository() string {
-	return config.repository
+	return config.Repository
 }
 
 func BuildRepository(service string) string {
-	return config.repository + service
+	return config.Repository + service
+}
+
+func ResolveResourceType() string {
+	// TODO: statefulsets from config
+	statefulSets := map[string]any{"api-core": struct{}{}}
+	if _, ok := statefulSets[microservice]; ok {
+		k8sResource = "statefulsets"
+	} else {
+		k8sResource = "deployments"
+	}
 }

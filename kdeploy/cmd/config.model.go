@@ -6,10 +6,10 @@ import (
 )
 
 type configuration struct {
-	registry     string
-	repository   string
-	statefulSets []string
-	previous     PreviousDeployments
+	Registry     string
+	Repository   string
+	StatefulSets []string
+	Previous     PreviousDeployments
 }
 
 type PreviousDeployments map[string]PreviousImages

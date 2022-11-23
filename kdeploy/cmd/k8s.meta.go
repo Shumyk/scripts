@@ -36,7 +36,7 @@ func LoadMetadata(config clientcmd.ClientConfig) {
 	ErrorCheck(err, "Resolving namespace failed")
 
 	k8sResourceName = namespace + "-" + microservice
-	resolveWorkloadType()
+	k8sResource = ResolveResourceType()
 
 	PrintEnvironmentInfo(microservice, namespace)
 }
@@ -56,15 +56,5 @@ func kubeConfigGetter(c clientcmd.ClientConfig) clientcmd.KubeconfigGetter {
 	return func() (*api.Config, error) {
 		c, err := c.RawConfig()
 		return &c, err
-	}
-}
-
-func resolveWorkloadType() {
-	// TODO: statefulsets from config
-	statefulSets := map[string]any{"api-core": struct{}{}}
-	if _, ok := statefulSets[microservice]; ok {
-		k8sResource = "statefulsets"
-	} else {
-		k8sResource = "deployments"
 	}
 }
