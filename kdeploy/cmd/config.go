@@ -40,7 +40,7 @@ func validateVitalConfigs(cobra *cobra.Command) {
 	if len(config.Repository) == 0 {
 		RedStderr("Repository not found in " + viper.ConfigFileUsed())
 		BoringStderr("You can add it using:")
-		BoringStderr("	kdeploy config set repository umbrella-infra/umbrella/umbrella")
+		BoringStderr("	kdeploy config set repository company-infra/company-")
 		BoringStderr("Or manually editing " + viper.ConfigFileUsed())
 		BoringStderr("	vim " + viper.ConfigFileUsed())
 		os.Exit(1)
