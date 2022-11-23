@@ -30,22 +30,21 @@ func InitConfig(cobra *cobra.Command) {
 func validateVitalConfigs(cobra *cobra.Command) {
 	if len(config.Registry) == 0 {
 		// TODO: stderr
-		Red("Registry not found in " + viper.ConfigFileUsed())
-		Boring("You can add it using:")
-		Boring("	kdeploy config set registry us.gcr.io")
-		Boring("Or manually editing " + viper.ConfigFileUsed())
-		Boring("	vim " + viper.ConfigFileUsed())
+		RedStderr("Registry not found in " + viper.ConfigFileUsed())
+		BoringStderr("You can add it using:")
+		BoringStderr("	kdeploy config set registry us.gcr.io")
+		BoringStderr("Or manually editing " + viper.ConfigFileUsed())
+		BoringStderr("	vim " + viper.ConfigFileUsed())
 		os.Exit(1)
 	}
 	if len(config.Repository) == 0 {
-		Red("Repository not found in " + viper.ConfigFileUsed())
-		Boring("You can add it using:")
-		Boring("	kdeploy config set repository umbrella-infra/umbrella/umbrella")
-		Boring("Or manually editing " + viper.ConfigFileUsed())
-		Boring("	vim " + viper.ConfigFileUsed())
+		RedStderr("Repository not found in " + viper.ConfigFileUsed())
+		BoringStderr("You can add it using:")
+		BoringStderr("	kdeploy config set repository umbrella-infra/umbrella/umbrella")
+		BoringStderr("Or manually editing " + viper.ConfigFileUsed())
+		BoringStderr("	vim " + viper.ConfigFileUsed())
 		os.Exit(1)
 	}
-	Boring("works")
 	os.Exit(0)
 	// TODO: implement for registry, repository
 }

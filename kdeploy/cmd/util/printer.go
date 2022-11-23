@@ -88,12 +88,13 @@ func buildInfoLine(key, value string) string {
 // colors
 // ↓↓↓						↓↓↓
 
-func Boring(msg ...any) {
-	fmt.Println(msg...)
+func BoringStderr(msg ...any) {
+	//fmt.Println(msg...)
+	fmt.Fprintln(os.Stderr, msg...)
 }
 
-func Red(msg any) {
-	fmt.Println(red(msg))
+func RedStderr(msg any) {
+	_, _ = fmt.Fprintln(os.Stderr, red(msg))
 }
 
 // ↑↑↑				      	    ↑↑↑
