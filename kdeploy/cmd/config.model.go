@@ -6,15 +6,20 @@ import (
 )
 
 type configuration struct {
-	Registry     string
-	Repository   string
-	StatefulSets []string
-	Previous     PreviousDeployments
+	Registry     string              `yaml:"registry,omitempty"`
+	Repository   string              `yaml:"repository,omitempty"`
+	StatefulSets []string            `yaml:"statefulSets,omitempty"`
+	Previous     PreviousDeployments `yaml:"previous,omitempty"`
 }
 
 type PreviousDeployments map[string]PreviousImages
 
-func (previous PreviousDeployments) Keys() []string {
+func (c configuration) View() *configuration {
+	c.Previous = nil
+	return &c
+}
+
+func (p PreviousDeployments) Keys() []string {
 	keyMapping := ReturnKey[string, PreviousImages]
-	return MapToSliceMapping(previous, keyMapping)
+	return MapToSliceMapping(p, keyMapping)
 }

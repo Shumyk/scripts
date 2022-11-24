@@ -3,8 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"os"
+	"gopkg.in/yaml.v3"
 	cmd "shumyk/kdeploy/cmd/util"
 )
 
@@ -13,10 +12,9 @@ func runConfig(cmd *cobra.Command, args []string) {
 }
 
 func runConfigView(_ *cobra.Command, _ []string) {
-	configFilePath := viper.GetViper().ConfigFileUsed()
-	configFileBytes, err := os.ReadFile(configFilePath)
-	cmd.ErrorCheck(err, "Couldn't read config file:", configFilePath)
-	fmt.Println(string(configFileBytes))
+	viewBytes, err := yaml.Marshal(config.View())
+	cmd.ErrorCheck(err, "Couldn't marshal config file")
+	fmt.Println(string(viewBytes))
 }
 
 func runConfigSet(cmd *cobra.Command, args []string) {
