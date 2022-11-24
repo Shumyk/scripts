@@ -36,6 +36,6 @@ func ErrorCheck(err error, msg ...string) {
 }
 
 func Error(s ...any) {
-	_, _ = fmt.Fprintln(os.Stderr, red(s))
+	_, _ = fmt.Fprintln(os.Stderr, red(s...))
 	os.Exit(1)
 }

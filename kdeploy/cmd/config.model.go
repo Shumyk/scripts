@@ -9,7 +9,7 @@ type configuration struct {
 	Registry     string              `yaml:"registry,omitempty"`
 	Repository   string              `yaml:"repository,omitempty"`
 	StatefulSets []string            `yaml:"statefulSets,omitempty"`
-	Previous     PreviousDeployments `yaml:"previous,omitempty"`
+	Previous     PreviousDeployments `yaml:"previous,omitempty" conf:"no"`
 }
 
 type PreviousDeployments map[string]PreviousImages

@@ -55,14 +55,14 @@ func init() {
 	kdeploy.Flags().BoolVarP(&previousMode, "previous", "p", false, "deploy previous")
 
 	configCmd := cobra.Command{
-		Use: "config [action] [args]...",
-		Run: runConfig,
+		Use:              "config [action] [args]...",
+		Run:              runConfig,
+		PersistentPreRun: loadConfig,
 	}
 	configViewCmd := cobra.Command{
-		Use:    "view",
-		Run:    runConfigView,
-		Args:   cobra.NoArgs,
-		PreRun: loadConfig,
+		Use:  "view",
+		Run:  runConfigView,
+		Args: cobra.NoArgs,
 	}
 	configEditCmd := cobra.Command{
 		Use:  "edit",

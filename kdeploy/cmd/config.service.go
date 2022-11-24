@@ -50,9 +50,9 @@ func validateVitalConfigs(cobra *cobra.Command) {
 	}
 }
 
-func SaveConfig(key string, value any) {
+func SetConfig(key string, value any) error {
 	viper.Set(key, value)
-	Laugh(viper.WriteConfig())
+	return viper.WriteConfig()
 }
 
 func SaveDeployedImage(tag, digest string) {
@@ -60,7 +60,7 @@ func SaveDeployedImage(tag, digest string) {
 	previous := GetPreviousDeployments()
 
 	previous[microservice] = append(previous[microservice], deployedImage)
-	SaveConfig("previous", previous)
+	Laugh(SetConfig("previous", previous))
 }
 
 func GetPreviousDeployments() PreviousDeployments {
