@@ -70,7 +70,8 @@ func init() {
 		Args: cobra.NoArgs,
 	}
 	configSetCmd := cobra.Command{
-		Use:  "set [property] [value]",
+		Use: "set [property] [value]",
+		// TODO: docs about setting array property types
 		Run:  runConfigSet,
 		Args: cobra.ExactArgs(2),
 	}

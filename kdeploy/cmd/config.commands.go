@@ -3,12 +3,12 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 	"gopkg.in/yaml.v3"
+	"os"
 	"reflect"
 	. "shumyk/kdeploy/cmd/util"
 	"strings"
+	"text/tabwriter"
 )
 
 func runConfig(cmd *cobra.Command, args []string) {
@@ -22,25 +22,41 @@ func runConfigView(_ *cobra.Command, _ []string) {
 }
 
 func runConfigSet(cmd *cobra.Command, args []string) {
-	key := cases.Title(language.English).String(args[0])
+	key := args[0]
 	value := args[1]
 
-	configValue := reflect.ValueOf(config)
-	field := configValue.FieldByName(key)
-	if field.IsValid() {
-		err := SetConfig(key, value)
-		ErrorCheck(err, "Could not set config")
-	} else {
-		RedStderr("Non existing property: " + key)
-		BoringStderr("Possible configuration properties:")
-		for i := 0; i < configValue.NumField(); i++ {
-			tag := configValue.Type().Field(i).Tag
-			if tag.Get("conf") != "no" {
-				fieldName := configValue.Type().Field(i).Name
-				fmt.Println("	-", strings.ToLower(fieldName))
+	configValue := reflect.ValueOf(&config)
+
+	fmt.Println(config.StatefulSets)
+	fmt.Println(len(config.StatefulSets))
+
+	fieldsNumber := configValue.Elem().NumField()
+	for i := 0; i < fieldsNumber; i++ {
+		field := configValue.Elem().Type().Field(i)
+		if field.Tag.Get("conf") != "no" {
+			if strings.EqualFold(field.Name, key) {
+				var valueObj any = value
+				if field.Type.Kind() == reflect.Slice {
+					valueObj = strings.Split(value, ",")
+				}
+				err := SetConfig(field.Name, valueObj)
+				ErrorCheck(err, "Could not set config")
+				return
 			}
 		}
 	}
+
+	RedStderr("Non existing property: " + key)
+	BoringStderr("Possible configuration properties:")
+
+	table := tabwriter.NewWriter(os.Stderr, 1, 2, 4, ' ', 0)
+	for i := 0; i < fieldsNumber; i++ {
+		field := configValue.Elem().Type().Field(i)
+		if field.Tag.Get("conf") != "no" {
+			_, _ = fmt.Fprintln(table, "\t"+strings.ToLower(field.Name)+"\t:\t"+field.Type.String())
+		}
+	}
+	_ = table.Flush()
 }
 
 func runConfigEdit(cmd *cobra.Command, args []string) {
