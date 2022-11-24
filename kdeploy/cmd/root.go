@@ -66,7 +66,7 @@ func init() {
 	}
 	configEditCmd := cobra.Command{
 		Use:  "edit",
-		Run:  runConfigEdit,
+		Run:  RunConfigEdit,
 		Args: cobra.NoArgs,
 	}
 	configSetCmd := cobra.Command{

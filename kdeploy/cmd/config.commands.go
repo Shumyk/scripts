@@ -3,8 +3,10 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 	"os"
+	"os/exec"
 	"reflect"
 	. "shumyk/kdeploy/cmd/util"
 	"strings"
@@ -29,6 +31,7 @@ func RunConfigSet(_ *cobra.Command, args []string) {
 	fieldsNumber := configValue.Elem().NumField()
 	for i := 0; i < fieldsNumber; i++ {
 		field := configValue.Elem().Type().Field(i)
+		// FIXME: this won't work if we have more than 1 value for tag
 		if field.Tag.Get("conf") == "no" {
 			continue
 		}
@@ -47,6 +50,9 @@ func RunConfigSet(_ *cobra.Command, args []string) {
 	_ = fieldsCollector.Flush()
 }
 
-func runConfigEdit(cmd *cobra.Command, args []string) {
-	fmt.Println("config edit command")
+func RunConfigEdit(_ *cobra.Command, _ []string) {
+	vim := exec.Command("vim", viper.ConfigFileUsed())
+	vim.Stdin, vim.Stdout = os.Stdin, os.Stdout
+	err := vim.Run()
+	ErrorCheck(err, "Error editing configuration")
 }
