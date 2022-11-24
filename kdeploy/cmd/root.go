@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"os"
 	. "shumyk/kdeploy/cmd/util"
 )
 
@@ -14,15 +13,14 @@ var (
 	kdeploy = cobra.Command{
 		Use:   "kdeploy [microservice]",
 		Short: "k[8s]deploy - deploy from the terminal",
-		Run:   run,
+		Run:   kdeployRun,
 		Args:  cobra.MaximumNArgs(1),
 	}
 )
 
-func run(cmd *cobra.Command, args []string) {
+func kdeployRun(cmd *cobra.Command, args []string) {
 	// TODO: remove when config commands finished
 	fmt.Println("kdeploy main")
-	os.Exit(0)
 	InitConfig(cmd)
 	if len(args) == 0 {
 		deploySelectingRegistry()
@@ -60,6 +58,11 @@ func init() {
 		Use: "config [action] [args]...",
 		Run: runConfig,
 	}
+	configViewCmd := cobra.Command{
+		Use:  "view",
+		Run:  runConfigView,
+		Args: cobra.NoArgs,
+	}
 	configEditCmd := cobra.Command{
 		Use:  "edit",
 		Run:  runConfigEdit,
@@ -71,11 +74,15 @@ func init() {
 		Args: cobra.ExactArgs(2),
 	}
 	kdeploy.AddCommand(&configCmd)
-	configCmd.AddCommand(&configSetCmd, &configEditCmd)
+	configCmd.AddCommand(&configViewCmd, &configSetCmd, &configEditCmd)
 }
 
 func runConfig(cmd *cobra.Command, args []string) {
 	fmt.Println("config command")
+}
+
+func runConfigView(_ *cobra.Command, _ []string) {
+	fmt.Println("config view command")
 }
 
 func runConfigSet(cmd *cobra.Command, args []string) {

@@ -45,8 +45,6 @@ func validateVitalConfigs(cobra *cobra.Command) {
 		BoringStderr("	vim " + viper.ConfigFileUsed())
 		os.Exit(1)
 	}
-	os.Exit(0)
-	// TODO: implement for registry, repository
 }
 
 func SaveConfig(key string, value any) {
