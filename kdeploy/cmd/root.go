@@ -15,7 +15,7 @@ var (
 		Use:   "kdeploy [microservice]",
 		Short: "k[8s]deploy - deploy from the terminal",
 		Run:   run,
-		//Args:  cobra.MaximumNArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 	}
 )
 
@@ -80,7 +80,7 @@ func runConfig(cmd *cobra.Command, args []string) {
 
 func runConfigSet(cmd *cobra.Command, args []string) {
 	fmt.Println("config set command")
-	fmt.Println("key", args[0], "value", args[1])
+	fmt.Println(args[0], "=", args[1])
 }
 
 func runConfigEdit(cmd *cobra.Command, args []string) {
