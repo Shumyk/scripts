@@ -59,9 +59,10 @@ func init() {
 		Run: runConfig,
 	}
 	configViewCmd := cobra.Command{
-		Use:  "view",
-		Run:  runConfigView,
-		Args: cobra.NoArgs,
+		Use:    "view",
+		Run:    runConfigView,
+		Args:   cobra.NoArgs,
+		PreRun: loadConfig,
 	}
 	configEditCmd := cobra.Command{
 		Use:  "edit",
@@ -75,4 +76,8 @@ func init() {
 	}
 	kdeploy.AddCommand(&configCmd)
 	configCmd.AddCommand(&configViewCmd, &configSetCmd, &configEditCmd)
+}
+
+func loadConfig(_ *cobra.Command, _ []string) {
+	LoadConfiguration()
 }

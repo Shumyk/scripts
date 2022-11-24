@@ -13,6 +13,11 @@ import (
 var config configuration
 
 func InitConfig(cobra *cobra.Command) {
+	LoadConfiguration()
+	validateVitalConfigs(cobra)
+}
+
+func LoadConfiguration() {
 	home, err := os.UserHomeDir()
 	Laugh(err)
 
@@ -23,8 +28,6 @@ func InitConfig(cobra *cobra.Command) {
 	_ = viper.SafeWriteConfig()
 	Laugh(viper.ReadInConfig())
 	Laugh(viper.Unmarshal(&config))
-
-	validateVitalConfigs(cobra)
 }
 
 func validateVitalConfigs(cobra *cobra.Command) {
