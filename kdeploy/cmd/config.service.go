@@ -55,6 +55,10 @@ func SetConfig(key string, value any) error {
 	return viper.WriteConfig()
 }
 
+func SetConfigHandling(key string, value any) {
+	ErrorCheck(SetConfig(key, value), "Could not set config")
+}
+
 func SaveDeployedImage(tag, digest string) {
 	deployedImage := PrevImageOf(tag, digest)
 	previous := GetPreviousDeployments()

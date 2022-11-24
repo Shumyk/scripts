@@ -22,41 +22,29 @@ func runConfigView(_ *cobra.Command, _ []string) {
 }
 
 func runConfigSet(cmd *cobra.Command, args []string) {
-	key := args[0]
-	value := args[1]
+	key, value := args[0], args[1]
+	fieldsCollector := tabwriter.NewWriter(os.Stderr, 1, 2, 4, ' ', tabwriter.TabIndent)
 
 	configValue := reflect.ValueOf(&config)
-
-	fmt.Println(config.StatefulSets)
-	fmt.Println(len(config.StatefulSets))
-
 	fieldsNumber := configValue.Elem().NumField()
 	for i := 0; i < fieldsNumber; i++ {
 		field := configValue.Elem().Type().Field(i)
-		if field.Tag.Get("conf") != "no" {
-			if strings.EqualFold(field.Name, key) {
-				var valueObj any = value
-				if field.Type.Kind() == reflect.Slice {
-					valueObj = strings.Split(value, ",")
-				}
-				err := SetConfig(field.Name, valueObj)
-				ErrorCheck(err, "Could not set config")
-				return
+		if field.Tag.Get("conf") == "no" {
+			continue
+		}
+		if strings.EqualFold(field.Name, key) {
+			var valueObj any = value
+			if field.Type.Kind() == reflect.Slice {
+				valueObj = strings.Split(value, ",")
 			}
+			SetConfigHandling(field.Name, valueObj)
+			return
 		}
+		_, _ = fmt.Fprintln(fieldsCollector, "\t"+strings.ToLower(field.Name)+"\t:\t"+field.Type.String())
 	}
-
-	RedStderr("Non existing property: " + key)
+	RedStderr("Non existing property: ", key)
 	BoringStderr("Possible configuration properties:")
-
-	table := tabwriter.NewWriter(os.Stderr, 1, 2, 4, ' ', 0)
-	for i := 0; i < fieldsNumber; i++ {
-		field := configValue.Elem().Type().Field(i)
-		if field.Tag.Get("conf") != "no" {
-			_, _ = fmt.Fprintln(table, "\t"+strings.ToLower(field.Name)+"\t:\t"+field.Type.String())
-		}
-	}
-	_ = table.Flush()
+	_ = fieldsCollector.Flush()
 }
 
 func runConfigEdit(cmd *cobra.Command, args []string) {

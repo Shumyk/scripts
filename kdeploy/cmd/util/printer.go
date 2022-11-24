@@ -89,12 +89,11 @@ func buildInfoLine(key, value string) string {
 // ↓↓↓						↓↓↓
 
 func BoringStderr(msg ...any) {
-	//fmt.Println(msg...)
-	fmt.Fprintln(os.Stderr, msg...)
+	_, _ = fmt.Fprintln(os.Stderr, msg...)
 }
 
-func RedStderr(msg any) {
-	_, _ = fmt.Fprintln(os.Stderr, red(msg))
+func RedStderr(msg ...any) {
+	_, _ = fmt.Fprintln(os.Stderr, red(msg...))
 }
 
 // ↑↑↑				      	    ↑↑↑

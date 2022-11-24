@@ -29,7 +29,7 @@ func Goodbye(s ...any) {
 	os.Exit(0)
 }
 
-func ErrorCheck(err error, msg ...string) {
+func ErrorCheck(err error, msg ...any) {
 	if err != nil {
 		Error(err, msg)
 	}
