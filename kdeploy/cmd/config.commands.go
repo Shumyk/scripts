@@ -21,7 +21,7 @@ func runConfigView(_ *cobra.Command, _ []string) {
 	fmt.Println(string(viewBytes))
 }
 
-func runConfigSet(cmd *cobra.Command, args []string) {
+func RunConfigSet(_ *cobra.Command, args []string) {
 	key, value := args[0], args[1]
 	fieldsCollector := tabwriter.NewWriter(os.Stderr, 1, 2, 4, ' ', tabwriter.TabIndent)
 

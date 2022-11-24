@@ -70,9 +70,9 @@ func init() {
 		Args: cobra.NoArgs,
 	}
 	configSetCmd := cobra.Command{
-		Use: "set [property] [value]",
+		Use: "set [property] [value1,value2..]",
 		// TODO: docs about setting array property types
-		Run:  runConfigSet,
+		Run:  RunConfigSet,
 		Args: cobra.ExactArgs(2),
 	}
 	kdeploy.AddCommand(&configCmd)
