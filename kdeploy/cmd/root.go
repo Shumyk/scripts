@@ -56,7 +56,6 @@ func init() {
 
 	configCmd := cobra.Command{
 		Use:              "config [action] [args]...",
-		Run:              runConfig,
 		PersistentPreRun: loadConfig,
 	}
 	configViewCmd := cobra.Command{

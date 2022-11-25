@@ -13,10 +13,6 @@ import (
 	"text/tabwriter"
 )
 
-func runConfig(cmd *cobra.Command, args []string) {
-	fmt.Println("config command")
-}
-
 func runConfigView(_ *cobra.Command, _ []string) {
 	viewBytes, err := yaml.Marshal(config.View())
 	ErrorCheck(err, "Couldn't marshal config file")
