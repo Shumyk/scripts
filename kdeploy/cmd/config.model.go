@@ -5,6 +5,8 @@ import (
 	. "shumyk/kdeploy/cmd/util"
 )
 
+var config configuration
+
 type configuration struct {
 	Registry     string              `yaml:"registry,omitempty"`
 	Repository   string              `yaml:"repository,omitempty"`
