@@ -1,6 +1,8 @@
 # kdeploy
 Deploy from the terminal.
 
+> it's moved to its [own repo](shumyk/kdeploy)
+
 Searches for images of requested microservice in Google Container Registry,
 Prompts you to interactively select an image for deployment (arrows navigation, search features),
 And sets the selected image in the workload.
