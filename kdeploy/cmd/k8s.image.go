@@ -5,7 +5,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	confApps "k8s.io/client-go/applyconfigurations/apps/v1"
 	core "k8s.io/client-go/applyconfigurations/core/v1"
-	"os"
 	. "shumyk/kdeploy/cmd/model"
 	. "shumyk/kdeploy/cmd/util"
 )
@@ -26,8 +25,6 @@ func GetImage() (tag, digest string) {
 }
 
 func SetImage(image *SelectedImage) {
-	// TODO: when finished with developing config commands
-	os.Exit(0)
 	newImage := ComposeImagePath(Registry(), Repository(), microservice, image.Tag(), image.Digest)
 	imageChange := composeImagePatch(newImage)
 	data, err := json.Marshal(imageChange)
