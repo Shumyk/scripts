@@ -20,35 +20,33 @@ func runConfigView(_ *cobra.Command, _ []string) {
 }
 
 func RunConfigSet(_ *cobra.Command, args []string) {
-	key, value := args[0], args[1]
-	fieldsCollector := tabwriter.NewWriter(os.Stderr, 1, 2, 4, ' ', tabwriter.TabIndent)
+	property, valueRaw := args[0], args[1]
+	properties := tabwriter.NewWriter(os.Stderr, 1, 2, 4, ' ', tabwriter.TabIndent)
 
 	configValue := reflect.ValueOf(&config)
-	fieldsNumber := configValue.Elem().NumField()
-	for i := 0; i < fieldsNumber; i++ {
+	for i := 0; i < configValue.Elem().NumField(); i++ {
 		field := configValue.Elem().Type().Field(i)
 		// FIXME: this won't work if we have more than 1 value for tag
 		if field.Tag.Get("conf") == "no" {
 			continue
 		}
-		if strings.EqualFold(field.Name, key) {
-			var valueObj any = value
+		if strings.EqualFold(field.Name, property) {
+			var value any = valueRaw
 			if field.Type.Kind() == reflect.Slice {
-				valueObj = strings.Split(value, ",")
+				value = strings.Split(valueRaw, ",")
 			}
-			SetConfigHandling(field.Name, valueObj)
+			SetConfigHandling(field.Name, value)
 			return
 		}
-		_, _ = fmt.Fprintln(fieldsCollector, "\t"+strings.ToLower(field.Name)+"\t:\t"+field.Type.String())
+		_, _ = fmt.Fprintln(properties, "\t"+strings.ToLower(field.Name)+"\t:\t"+field.Type.String())
 	}
-	RedStderr("Non existing property: ", key)
+	RedStderr("Non existing property: ", property)
 	BoringStderr("Possible configuration properties:")
-	_ = fieldsCollector.Flush()
+	ErrorCheck(properties.Flush(), "Could not print configuration properties")
 }
 
 func RunConfigEdit(_ *cobra.Command, _ []string) {
 	vim := exec.Command("vim", viper.ConfigFileUsed())
 	vim.Stdin, vim.Stdout = os.Stdin, os.Stdout
-	err := vim.Run()
-	ErrorCheck(err, "Error editing configuration")
+	ErrorCheck(vim.Run(), "Error editing configuration")
 }
