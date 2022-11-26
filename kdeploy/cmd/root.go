@@ -18,10 +18,9 @@ var (
 	}
 )
 
-func kdeployRun(cmd *cobra.Command, args []string) {
+func kdeployRun(_ *cobra.Command, args []string) {
 	// TODO: remove when config commands finished
 	fmt.Println("kdeploy main")
-	InitConfig(cmd)
 	if len(args) == 0 {
 		deploySelectingRegistry()
 	} else {
@@ -52,6 +51,7 @@ func Execute() {
 }
 
 func init() {
+	cobra.OnInitialize(InitConfig)
 	kdeploy.Flags().BoolVarP(&previousMode, "previous", "p", false, "deploy previous")
 
 	configCmd := cobra.Command{
@@ -69,7 +69,7 @@ func init() {
 		Args: cobra.NoArgs,
 	}
 	configSetCmd := cobra.Command{
-		Use: "set [property] [value1,value2..]",
+		Use: "set [property] [value]",
 		// TODO: docs about setting array property types
 		Run:  RunConfigSet,
 		Args: cobra.ExactArgs(2),
