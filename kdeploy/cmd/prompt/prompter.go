@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"shumyk/kdeploy/cmd/model"
 	util "shumyk/kdeploy/cmd/util"
 
@@ -11,6 +12,14 @@ const (
 	imageSelectTitle = "select image to deploy"
 	repoSelectTitle  = "select repo"
 )
+
+func TextInput(name string) (result string, err error) {
+	textInput := survey.Input{
+		Message: fmt.Sprintf("please enter %v", name),
+	}
+	err = survey.AskOne(&textInput, &result)
+	return
+}
 
 func ImageSelect(input model.PromptInputs) model.SelectedImage {
 	options := input.ImageOptions().Sorted().Stringify()

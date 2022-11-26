@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/spf13/cobra"
 	"os"
+	prompt "shumyk/kdeploy/cmd/prompt"
 
 	. "shumyk/kdeploy/cmd/model"
 	. "shumyk/kdeploy/cmd/util"
@@ -12,12 +14,12 @@ import (
 
 var config configuration
 
-func InitConfig() {
-	LoadConfiguration()
+func InitConfig(_ *cobra.Command, _ []string) {
+	LoadConfiguration(nil, nil)
 	validateVitalConfigs()
 }
 
-func LoadConfiguration() {
+func LoadConfiguration(_ *cobra.Command, _ []string) {
 	home, err := os.UserHomeDir()
 	Laugh(err)
 
@@ -31,22 +33,28 @@ func LoadConfiguration() {
 }
 
 func validateVitalConfigs() {
-	//missingConfigs := make([]Entry, 0, 2)
 	if len(config.Registry) == 0 {
-		//missingConfigs = append(missingConfigs, EntryOf("registry", "us.gcr.io"))
-		printNotFoundVitalConfigError("registry", "us.gcr.io")
+		promptAndSaveConfig("registry")
 	}
 	if len(config.Repository) == 0 {
-		printNotFoundVitalConfigError("repository", "company-infra/company-")
+		promptAndSaveConfig("repository")
 	}
 }
 
-func printNotFoundVitalConfigError(config, configValue string) {
-	RedStderr(config, "not found in "+viper.ConfigFileUsed())
-	BoringStderr("You can set it using:")
-	BoringStderr(fmt.Sprintf("	kdeploy config set %v %v", config, configValue))
-	BoringStderr("Or manually editing " + viper.ConfigFileUsed())
-	BoringStderr("	vim " + viper.ConfigFileUsed())
+func promptAndSaveConfig(configName string) {
+	RedStderr(configName, " not found in ", viper.ConfigFileUsed())
+	configValue, err := prompt.TextInput(configName)
+	if err != nil {
+		printMissingConfigInfo(configName)
+	}
+	SetConfigHandling(configName, configValue)
+}
+
+func printMissingConfigInfo(config string) {
+	BoringStderr("Looks like you ctrl-c input. However, you can set it using:")
+	BoringStderr(fmt.Sprintf("	kdeploy config set %v <value>", config))
+	BoringStderr("Or manually editing:")
+	BoringStderr("	kdeploy config edit")
 	os.Exit(1)
 }
 

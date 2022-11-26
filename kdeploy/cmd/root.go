@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
 	. "shumyk/kdeploy/cmd/util"
 )
@@ -11,16 +10,15 @@ var (
 
 	// TODO: more info here needed
 	kdeploy = cobra.Command{
-		Use:   "kdeploy [microservice]",
-		Short: "k[8s]deploy - deploy from the terminal",
-		Run:   kdeployRun,
-		Args:  cobra.MaximumNArgs(1),
+		Use:    "kdeploy [microservice]",
+		Short:  "k[8s]deploy - deploy from the terminal",
+		Run:    kdeployRun,
+		Args:   cobra.MaximumNArgs(1),
+		PreRun: InitConfig,
 	}
 )
 
 func kdeployRun(_ *cobra.Command, args []string) {
-	// TODO: remove when config commands finished
-	fmt.Println("kdeploy main")
 	if len(args) == 0 {
 		deploySelectingRegistry()
 	} else {
@@ -51,12 +49,11 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(InitConfig)
 	kdeploy.Flags().BoolVarP(&previousMode, "previous", "p", false, "deploy previous")
 
 	configCmd := cobra.Command{
 		Use:              "config [action] [args]...",
-		PersistentPreRun: loadConfig,
+		PersistentPreRun: LoadConfiguration,
 	}
 	configViewCmd := cobra.Command{
 		Use:  "view",
@@ -76,8 +73,4 @@ func init() {
 	}
 	kdeploy.AddCommand(&configCmd)
 	configCmd.AddCommand(&configViewCmd, &configSetCmd, &configEditCmd)
-}
-
-func loadConfig(_ *cobra.Command, _ []string) {
-	LoadConfiguration()
 }
